@@ -45,3 +45,5 @@ final currentIndexProvider =
     StateProvider<SelectedMenu>((ref) => SelectedMenu.home);
 
 final gridViewStateProvider = StateProvider<bool>((ref) => true);
+
+final scrollProducts = StateProvider<bool>((ref) => true);

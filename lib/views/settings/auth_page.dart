@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/services/providers.dart';
+import 'package:tez_bazar/providers/providers.dart';
 
 class AuthPage extends ConsumerWidget {
   const AuthPage({super.key});

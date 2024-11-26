@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/app_bar.dart';
-import 'package:tez_bazar/bottom_bar.dart';
-import 'package:tez_bazar/common/forms/text_field_forms.dart';
-import 'package:tez_bazar/home/category_page.dart';
-import 'package:tez_bazar/home/product_page.dart';
-import 'package:tez_bazar/services/providers.dart';
+import 'package:tez_bazar/views/home/category/category_page.dart';
+import 'package:tez_bazar/views/home/product/product_page.dart';
+import 'package:tez_bazar/providers/providers.dart';
 
 class BodySwitcher extends ConsumerStatefulWidget {
   const BodySwitcher({super.key});
@@ -20,7 +17,6 @@ class BodySwitcherState extends ConsumerState<BodySwitcher> {
   @override
   Widget build(BuildContext context) {
     final showFirstGrid = ref.watch(gridViewStateProvider);
-    final currentIndex = ref.watch(currentIndexProvider);
     print("BODY CONTENT");
     print('bodySwitcher state: $showFirstGrid');
     return AnimatedSwitcher(
@@ -35,7 +31,9 @@ class BodySwitcherState extends ConsumerState<BodySwitcher> {
           child: SlideTransition(position: offsetAnimation, child: child),
         );
       },
-      child: showFirstGrid ? const CategoryPage() : const ProductsPage(),
+      child: showFirstGrid
+          ? const CategoryPage(key: PageStorageKey<String>('category_grid'))
+          : const ProductsPage(key: PageStorageKey<String>('product_grid')),
     );
   }
 }

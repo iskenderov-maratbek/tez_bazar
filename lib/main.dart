@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_theme.dart';
-import 'package:tez_bazar/home/home.dart';
+import 'package:tez_bazar/views/home/home.dart';
 import 'package:tez_bazar/services/category_service.dart';
 import 'package:tez_bazar/services/product_service.dart';
 

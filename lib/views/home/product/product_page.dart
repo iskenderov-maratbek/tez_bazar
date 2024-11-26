@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/services/providers.dart';
+import 'package:tez_bazar/providers/providers.dart';
 
 final List<int> colorCodes = <int>[600, 500, 100];
 
@@ -31,7 +31,7 @@ class ProductsPageState extends ConsumerState<ProductsPage> {
   @override
   Widget build(BuildContext context) {
     final products = ref.watch(productProvider);
-
+    
     return GridView.builder(
       controller: _scrollController,
       itemCount: products.length,
