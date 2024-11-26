@@ -40,7 +40,7 @@ class _TextFieldFormState extends State<TextFieldForm> {
         if (hasFocus) {
           setState(() {
             fillColor = Colors.white;
-            prefixColor = Colors.purple;
+            prefixColor = Colors.green;
           });
           print('Focus YES: $hasFocus');
         } else {

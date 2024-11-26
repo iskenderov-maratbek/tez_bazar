@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/app_bar.dart';
 import 'package:tez_bazar/home/auth_page.dart';
+import 'package:tez_bazar/home/body_switcher.dart';
 import 'package:tez_bazar/home/category_page.dart';
 import 'package:tez_bazar/services/providers.dart';
 
@@ -19,69 +20,79 @@ class _HomeState extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     final isAuthenticated = ref.watch(authProvider);
     final currentIndex = ref.watch(currentIndexProvider);
+    final showFirstGrid = ref.watch(gridViewStateProvider);
     print('currentIndex: $currentIndex');
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.grey[300],
-        appBar: customAppBar(controller, context, currentIndex),
-        body: _buildBody(currentIndex, isAuthenticated),
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                style:
-                    IconButton.styleFrom(backgroundColor: Colors.transparent),
-                icon: Icon(
-                  currentIndex == SelectedMenu.home
-                      ? Icons.home
-                      : Icons.home_outlined,
-                  color: currentIndex == SelectedMenu.home
-                      ? Colors.blue
-                      : Colors.grey,
-                ),
-                onPressed: () {
-                  ref.read(currentIndexProvider.notifier).state =
-                      SelectedMenu.home;
-                },
-              ),
-              Visibility(
-                visible: isAuthenticated,
-                child: IconButton(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        print('Popped: $didPop, Result: $result');
+        if (didPop == showFirstGrid) {
+          ref.read(gridViewStateProvider.notifier).state = true;
+        }
+      },
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.grey[300],
+          appBar: CustomAppBar(),
+          body: _buildBody(currentIndex, isAuthenticated),
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
                   style:
                       IconButton.styleFrom(backgroundColor: Colors.transparent),
                   icon: Icon(
-                    currentIndex == SelectedMenu.products
-                        ? Icons.search
-                        : Icons.search_outlined,
-                    color: currentIndex == SelectedMenu.products
+                    currentIndex == SelectedMenu.home
+                        ? Icons.home
+                        : Icons.home_outlined,
+                    color: currentIndex == SelectedMenu.home
                         ? Colors.blue
                         : Colors.grey,
                   ),
                   onPressed: () {
                     ref.read(currentIndexProvider.notifier).state =
-                        SelectedMenu.products;
+                        SelectedMenu.home;
                   },
                 ),
-              ),
-              IconButton(
-                style:
-                    IconButton.styleFrom(backgroundColor: Colors.transparent),
-                icon: Icon(
-                  currentIndex == SelectedMenu.settings
-                      ? Icons.add_circle
-                      : Icons.add_circle_outline,
-                  color: currentIndex == SelectedMenu.settings
-                      ? Colors.blue
-                      : Colors.grey,
+                Visibility(
+                  visible: isAuthenticated,
+                  child: IconButton(
+                    style: IconButton.styleFrom(
+                        backgroundColor: Colors.transparent),
+                    icon: Icon(
+                      currentIndex == SelectedMenu.products
+                          ? Icons.search
+                          : Icons.search_outlined,
+                      color: currentIndex == SelectedMenu.products
+                          ? Colors.blue
+                          : Colors.grey,
+                    ),
+                    onPressed: () {
+                      ref.read(currentIndexProvider.notifier).state =
+                          SelectedMenu.products;
+                    },
+                  ),
                 ),
-                onPressed: () {
-                  ref.read(currentIndexProvider.notifier).state =
-                      SelectedMenu.settings;
-                },
-              ),
-            ],
+                IconButton(
+                  style:
+                      IconButton.styleFrom(backgroundColor: Colors.transparent),
+                  icon: Icon(
+                    currentIndex == SelectedMenu.settings
+                        ? Icons.add_circle
+                        : Icons.add_circle_outline,
+                    color: currentIndex == SelectedMenu.settings
+                        ? Colors.blue
+                        : Colors.grey,
+                  ),
+                  onPressed: () {
+                    ref.read(currentIndexProvider.notifier).state =
+                        SelectedMenu.settings;
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -91,15 +102,13 @@ class _HomeState extends ConsumerState<Home> {
   Widget _buildBody(SelectedMenu currentIndex, bool isAuthenticated) {
     switch (currentIndex) {
       case SelectedMenu.home:
-        return CategoryPage();
+        return const BodySwitcher();
       case SelectedMenu.settings:
         return const AuthPage();
       case SelectedMenu.products:
         return isAuthenticated
-            ? const Center(child: Text('Notifications Page'))
-            : CategoryPage();
-      default:
-        return CategoryPage();
+            ? const Center(child: Text('Product Page'))
+            : const BodySwitcher();
     }
   }
 }

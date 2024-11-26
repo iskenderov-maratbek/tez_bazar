@@ -2,48 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/services/providers.dart';
 
-final List<String> entries = <String>['A', 'B', 'C'];
 final List<int> colorCodes = <int>[600, 500, 100];
-
-// class GridGen extends ConsumerStatefulWidget {
-//   const GridGen({super.key});
-
-//   @override
-//   ConsumerState<GridGen> createState() => _GridGenState();
-// }
-
-// class _GridGenState extends ConsumerState<GridGen> {
-//   @override
-//   Widget build(BuildContext context) {
-//     print('object');
-//     return GridView.builder(
-//       padding: const EdgeInsets.all(8),
-//       itemCount: entries.length,
-//       itemBuilder: (BuildContext context, int index) {
-//         return GestureDetector(
-//           onTap: () {
-//             print('Tapped on entry ${entries[index]}');
-//           },
-//           child: Container(
-//             height: 50,
-//             color: Colors.amber[colorCodes[index]],
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 Center(child: Text('Entry ${entries[index]}')),
-//               ],
-//             ),
-//           ),
-//         );
-//       },
-//       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//         mainAxisSpacing: 15,
-//         crossAxisSpacing: 15,
-//         crossAxisCount: 2,
-//       ),
-//     );
-//   }
-// }
 
 class ProductsPage extends ConsumerStatefulWidget {
   const ProductsPage({super.key});

@@ -46,7 +46,7 @@ ThemeData themeData(BuildContext context) {
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.purple, width: borderSize),
+        borderSide: BorderSide(color: Colors.blueAccent, width: borderSize),
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       errorBorder: OutlineInputBorder(
@@ -84,7 +84,7 @@ ThemeData themeData(BuildContext context) {
           } else if (state.contains(WidgetState.selected)) {
             return const Color.fromARGB(0, 0, 0, 0);
           }
-          return  const Color.fromRGBO(156, 39, 176, 1);
+          return const Color.fromRGBO(156, 39, 176, 1);
         }),
       ),
     ),
