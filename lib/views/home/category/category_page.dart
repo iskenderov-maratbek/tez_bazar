@@ -71,79 +71,77 @@ class CategoryPageState extends ConsumerState<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final products = ref.watch(categoryProvider);
+    final categories = ref.watch(categoryProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: GridView.builder(
-        controller: _scrollController,
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return ElevatedButton(
-            onPressed: () {
-              ref.read(productProvider.notifier).searchProducts(product.id);
-              ref.read(gridViewStateProvider.notifier).state = false;
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.all(5),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15))),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.amber[colorCodes[index % colorCodes.length]],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.asset(
-                      product.photo ?? 'lib/assets/200.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      product.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        const Text(
-                          'Количество',
-                          textAlign: TextAlign.end,
-                        ),
-                        const SizedBox(width: 8.0),
-                        Text(
-                          '${product.pieces} шт.',
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return GridView.builder(
+      controller: _scrollController,
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        return ElevatedButton(
+          onPressed: () {
+            ref.read(productProvider.notifier).selectedCategory = category.id;
+            ref.read(appBarTitleProvider.notifier).state = category.name;
+            ref.read(gridViewStateProvider.notifier).state = false;
+          },
+          style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              padding: const EdgeInsets.all(5),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15))),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Colors.amber[colorCodes[index % colorCodes.length]],
             ),
-          );
-        },
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, // Количество столбцов
-          crossAxisSpacing: 0, // Отступ между столбцами
-          mainAxisSpacing: 0, // Отступ между строками
-          childAspectRatio: 0.7, // Соотношение сторон элементов
-        ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.asset(
+                    'lib/assets/200.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    category.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text(
+                        'Количество',
+                        textAlign: TextAlign.end,
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        '${category.pieces} шт.',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, // Количество столбцов
+        crossAxisSpacing: 0, // Отступ между столбцами
+        mainAxisSpacing: 0, // Отступ между строками
+        childAspectRatio: 0.7, // Соотношение сторон элементов
       ),
     );
   }

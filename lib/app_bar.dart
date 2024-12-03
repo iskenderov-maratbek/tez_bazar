@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/forms/text_field_forms.dart';
+import 'package:tez_bazar/common/forms/text_forms.dart';
+import 'package:tez_bazar/providers/providers.dart';
 
-class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
+class CustomAppBar extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   const CustomAppBar({super.key});
 
   @override
   CustomAppBarState createState() => CustomAppBarState();
 
   @override
-  // TODO: implement preferredSize
   Size get preferredSize => const Size.fromHeight(150.0);
 }
 
-class CustomAppBarState extends State<CustomAppBar> {
+class CustomAppBarState extends ConsumerState<CustomAppBar> {
   final TextEditingController controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final title = ref.watch(appBarTitleProvider);
     return Container(
       decoration: const BoxDecoration(
         boxShadow: [
@@ -36,9 +40,9 @@ class CustomAppBarState extends State<CustomAppBar> {
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 15),
-            child: Text('TEZ Bazar', style: TextStyle(fontSize: 30)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            child: text32bold(title),
           ),
           textFieldSearch(controller),
         ],

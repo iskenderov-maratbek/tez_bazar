@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/providers/providers.dart';
+import 'package:tez_bazar/views/home/product_info.dart';
 
 final List<int> colorCodes = <int>[600, 500, 100];
 
@@ -18,20 +19,21 @@ class ProductsPageState extends ConsumerState<ProductsPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    ref.read(categoryProvider.notifier).fetchCategory();
+    ref.read(productProvider.notifier).getProductFromCategory();
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      ref.read(categoryProvider.notifier).fetchCategory();
+      ref.read(productProvider.notifier).getProductFromCategory();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    print('Build ProductsPage');
     final products = ref.watch(productProvider);
-    
+
     return GridView.builder(
       controller: _scrollController,
       itemCount: products.length,
@@ -39,6 +41,22 @@ class ProductsPageState extends ConsumerState<ProductsPage> {
         final product = products[index];
         return ElevatedButton(
           onPressed: () {
+            ref.read(productProvider.notifier).getProductInfo(product.id);
+
+            showModalBottomSheet(
+              // scrollControlDisabledMaxHeightRatio: 4,
+              backgroundColor: Colors.white,
+              context: context,
+              isScrollControlled: false,
+              builder: (context) {
+                return ProductInfo(
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  photo: product.photo,
+                );
+              },
+            );
             print('СКОРО БУДЕТ РАЗРАБОТАНО!');
           },
           style: ElevatedButton.styleFrom(
@@ -59,7 +77,8 @@ class ProductsPageState extends ConsumerState<ProductsPage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(
-                    product.photo ?? 'lib/assets/200.png',
+                    // product.photo ??
+                    'lib/assets/200.png',
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -73,26 +92,12 @@ class ProductsPageState extends ConsumerState<ProductsPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(width: 16.0),
+                      const SizedBox(width: 16.0),
                       Text(
                         '${product.price} руб.',
                         style: const TextStyle(color: Colors.grey),
                       ),
                     ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    'Доставка: ${product.delivery ? 'Есть' : 'Нет'}',
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    'Адрес: ${product.location}',
-                    style: const TextStyle(color: Colors.grey),
                   ),
                 ),
               ],

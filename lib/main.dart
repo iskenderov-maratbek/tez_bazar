@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_theme.dart';
 import 'package:tez_bazar/views/home/home.dart';
-import 'package:tez_bazar/services/category_service.dart';
-import 'package:tez_bazar/services/product_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    ProviderScope(
-      overrides: [
-        StateNotifierProvider((_) => ProductService()),
-        StateNotifierProvider((_) => CategoryService()),
-      ],
-      child: const TezBazar(),
+    const ProviderScope(
+      child: TezBazar(),
     ),
   );
 }
@@ -43,3 +37,5 @@ class TezBazar extends StatelessWidget {
     );
   }
 }
+// Пример кода на клиентской стороне для получения данных
+

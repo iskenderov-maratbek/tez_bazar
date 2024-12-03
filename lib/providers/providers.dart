@@ -1,9 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-import 'package:tez_bazar/models/category.dart';
-import 'package:tez_bazar/models/product.dart';
+import 'package:tez_bazar/models/categories.dart';
+import 'package:tez_bazar/models/products.dart';
+import 'package:tez_bazar/models/selected_product.dart';
 import 'package:tez_bazar/services/category_service.dart';
 import 'package:tez_bazar/services/product_service.dart';
 
@@ -17,27 +16,10 @@ final categoryProvider =
 
 final productProvider =
     StateNotifierProvider<ProductService, List<Products>>((ref) {
-  return ProductService();
+  return ProductService(ref);
 });
 
 // Провайдер для состояния авторизации
-final authProvider = StateNotifierProvider<AuthNotifier, bool>((ref) {
-  return AuthNotifier();
-});
-
-class AuthNotifier extends StateNotifier<bool> {
-  AuthNotifier() : super(false);
-
-  // Метод для авторизации пользователя
-  void login() {
-    state = true;
-  }
-
-  // Метод для выхода пользователя
-  void logout() {
-    state = false;
-  }
-}
 
 enum SelectedMenu { home, products, settings }
 
@@ -46,4 +28,10 @@ final currentIndexProvider =
 
 final gridViewStateProvider = StateProvider<bool>((ref) => true);
 
-final scrollProducts = StateProvider<bool>((ref) => true);
+final scrollProductsProvider = StateProvider<bool>((ref) => true);
+
+final appBarTitleProvider = StateProvider<String>((ref) => 'Tez Bazar');
+
+final selectedProductProvider = StateProvider<SelectedProduct>((ref) =>
+    SelectedProduct(
+        seller: 'loading...', number: 'loading...', delivery: false));
