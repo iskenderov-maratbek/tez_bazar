@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tez_bazar/common/network_data.dart';
 import 'package:tez_bazar/models/user.dart';
 import 'package:tez_bazar/providers/auth_provider.dart';
 
@@ -14,44 +15,52 @@ class AuthService extends StateNotifier<User?> {
   AuthService(this.ref) : super(null);
 
   Future<void> signInWithGoogle() async {
+    print('Signing in with Google...');
     final googleSignIn = ref.read(googleSignInProvider);
     final authProvider = ref.read(authProviderState.notifier);
 
     try {
-      authProvider.state = AuthStatus.authenticating;
+      print('Starting Google Sign In');
+      authProvider.state = AuthViewContent.authenticating;
+      print('authProvider: $authProvider');
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
-        authProvider.state = AuthStatus.unauthenticated;
+        authProvider.state = AuthViewContent.unauthenticated;
         return;
       }
       final googleAuth = await googleUser.authentication;
       // Проверка токена на сервере (пример HTTP-запроса)
+      print('googleUser  : $googleUser');
       final response = await http.post(
-        Uri.parse('http://192.168.1.103:3000/authWithGoogle'),
+        Uri.parse(
+          Network.getUrl(
+            path: 'authWithGoogle',
+          ),
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'id': googleUser.id,
           'name': googleUser.displayName,
           'email': googleUser.email,
           'photo': googleUser.photoUrl,
-          'idToken': googleAuth.idToken,
           'accessToken': googleAuth.accessToken,
         }),
       );
       if (response.statusCode == 200) {
         User user = User.fromJson(jsonDecode(response.body));
         state = user;
-        authProvider.state = AuthStatus.authenticated;
+        authProvider.state = AuthViewContent.authenticated;
       } else {
-        authProvider.state = AuthStatus.error;
+        authProvider.state = AuthViewContent.error;
       }
     } catch (e) {
-      authProvider.state = AuthStatus.error;
+      print('Error signing in with Google: $e');
+      authProvider.state = AuthViewContent.error;
     }
   }
 
   Future<void> signOut() async {
     final authProvider = ref.read(authProviderState.notifier);
-    authProvider.state = AuthStatus.defaultState;
+    authProvider.state = AuthViewContent.defaultState;
   }
 }

@@ -8,6 +8,7 @@
             "name": "tez_bazar",
             "request": "launch",
             "type": "dart",
+            "flutterMode": "debug"
         },
         {
             "name": "tez_bazar (profile mode)",

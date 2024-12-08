@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_theme.dart';
-import 'package:tez_bazar/views/home/home.dart';
+import 'package:tez_bazar/views/home/home_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,9 +31,10 @@ class TezBazar extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'TezBazar',
       theme: themeData(context),
+
       home:
           // context.read<AuthService>().checkAuth() ? const Home() : const Auth(),
-          const Home(),
+          const HomeView(),
     );
   }
 }

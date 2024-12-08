@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-enum AuthStatus {
+enum AuthViewContent {
   defaultState,
   authenticated,
   unauthenticated,
   authenticating,
-  error,
+  error, profile,
 }
 
 final authProviderState =
-    StateProvider<AuthStatus>((ref) => AuthStatus.defaultState);
+    StateProvider<AuthViewContent>((ref) => AuthViewContent.defaultState);
 
 final googleSignInProvider = Provider<GoogleSignIn>(
   (ref) {

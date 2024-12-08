@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tez_bazar/common/network_data.dart';
 import 'package:tez_bazar/models/categories.dart';
 
 class CategoryService extends StateNotifier<List<Category>> {
@@ -10,14 +11,17 @@ class CategoryService extends StateNotifier<List<Category>> {
   final int _limit = 5;
   bool _loadCompleted = false;
 
-  
-
-
   Future<void> fetchCategory() async {
     if (!_loadCompleted) {
       try {
-        final response = await http.get(Uri.parse(
-            'http://192.168.1.103:3000/categories?offset=$_offset&limit=$_limit'));
+        final response = await http.get(
+          Uri.parse(
+            Network.getUrl(
+              path: 'categories',
+              parameters: 'offset=$_offset&limit=$_limit',
+            ),
+          ),
+        );
         if (response.statusCode == 200) {
           List<Category> categories = [];
           List<dynamic> data = json.decode(response.body);

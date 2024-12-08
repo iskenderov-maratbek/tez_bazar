@@ -2,9 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:tez_bazar/models/categories.dart';
 import 'package:tez_bazar/models/products.dart';
-import 'package:tez_bazar/models/selected_product.dart';
+import 'package:tez_bazar/models/search_history.dart';
 import 'package:tez_bazar/services/category_service.dart';
 import 'package:tez_bazar/services/product_service.dart';
+import 'package:tez_bazar/services/search_service.dart';
 
 // Модель данных
 
@@ -19,6 +20,11 @@ final productProvider =
   return ProductService(ref);
 });
 
+final searchProvider =
+    StateNotifierProvider<ProductSearchService, List<SearchHistory>>((ref) {
+  return ProductSearchService(ref);
+});
+
 // Провайдер для состояния авторизации
 
 enum SelectedMenu { home, products, settings }
@@ -26,12 +32,13 @@ enum SelectedMenu { home, products, settings }
 final currentIndexProvider =
     StateProvider<SelectedMenu>((ref) => SelectedMenu.home);
 
-final gridViewStateProvider = StateProvider<bool>((ref) => true);
+enum GridPage { category, product, search }
+
+final gridViewStateProvider =
+    StateProvider<GridPage>((ref) => GridPage.category);
 
 final scrollProductsProvider = StateProvider<bool>((ref) => true);
 
-final appBarTitleProvider = StateProvider<String>((ref) => 'Tez Bazar');
+final appBarTitleProvider = StateProvider<String?>((ref) => 'Tez Bazar');
 
-final selectedProductProvider = StateProvider<SelectedProduct>((ref) =>
-    SelectedProduct(
-        seller: 'loading...', number: 'loading...', delivery: false));
+final searchActiveProvider = StateProvider<bool>((ref) => false);

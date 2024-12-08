@@ -1,49 +1,43 @@
 import 'package:flutter/material.dart';
 
-text16normal(String text) => Text(
-      text,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.normal,
-        color: Colors.black,
-      ),
-    );
+final Color textColor = Colors.white;
 
-text18Bold(String text) => Text(
-      text,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
-    );
+textForm(
+  String text,
+  double size, {
+  Color? color,
+  TextOverflow? overflow,
+  TextAlign? textAlign,
+  FontWeight? weight,
+  TextDecoration? decoration,
+  Color? decorationColor,
+}) {
+  return Text(
+    text,
+    textAlign: textAlign,
+    style: TextStyle(
+      fontSize: size,
+      color: color ?? textColor,
+      overflow: overflow,
+      fontWeight: weight,
+      decoration: decoration,
+      decorationColor: decorationColor,
+    ),
+  );
+}
 
-text20bold(String text) => Text(
-      text,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
-      overflow: TextOverflow.ellipsis,
-    );
+String setPhoneFormat(String phoneNumber) {
+  String cleaned = phoneNumber.replaceAll(RegExp(r'[^+\d]'), '');
 
-text24bold(String text) => Text(
-      text,
-      style: const TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
-      overflow: TextOverflow.ellipsis,
-    );
+  if (cleaned.length == 13 && cleaned.startsWith('+996')) {
+    return '${cleaned.substring(0, 4)} (${cleaned.substring(4, 7)}) ${cleaned.substring(7, 9)}-${cleaned.substring(9, 11)}-${cleaned.substring(11, 13)}';
+  } else {
+    return phoneNumber;
+  }
+}
 
-text32bold(String text) => Text(
-      text,
-      style: const TextStyle(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
-      overflow: TextOverflow.ellipsis,
+setCurrency(double width) => Image.asset(
+      'lib/assets/images/icons/currency_yellow.png',
+      fit: BoxFit.contain,
+      width: width,
     );
