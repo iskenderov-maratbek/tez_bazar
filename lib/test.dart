@@ -1,46 +1,106 @@
-import 'package:flutter/material.dart';
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
+// Future<List<Todo>> fetchTodos() async {
+//   // Пример данных
+//   final List<Map<String, dynamic>> responseData = [
+//     {'name': 'Задача 1', 'description': 'Описание 1', 'status': 'active'},
+//     {'name': 'Задача 2', 'description': 'Описание 2', 'status': 'inactive'},
+//     // Добавьте больше данных по необходимости
+//   ];
 
-class _HomePageState extends State<HomePage> {
-  bool typing = false;
+//   return responseData.map((data) => Todo.fromJson(data)).toList();
+// }
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: typing ? TextBox() : Text("Title"),
-        leading: IconButton(
-          icon: Icon(typing ? Icons.done : Icons.search),
-          onPressed: () {
-            setState(() {
-              typing = !typing;
-            });
-          },
-        ),
-      ),
-      body: const Center(
-        child: Text("Your app content"),
-      ),
-    );
-  }
-}
+// // Провайдер для списка задач
+// final todosProvider = FutureProvider<List<Todo>>((ref) async {
+//   return fetchTodos();
+// });
 
-class TextBox extends StatelessWidget {
-  const TextBox({super.key});
+// // Провайдер для активного сегмента
+// final segmentProvider = StateProvider<String>((ref) => 'active');
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      color: Colors.white,
-      child: const TextField(
-        decoration:
-            InputDecoration(border: InputBorder.none, hintText: 'Search'),
-      ),
-    );
-  }
-}
+// // Разделение задач на активные и неактивные
+// final categorizedTodosProvider = Provider<Map<String, List<Todo>>>((ref) {
+//   final todos = ref.watch(todosProvider).maybeWhen(
+//         data: (todos) => todos,
+//         orElse: () => [],
+//       );
+
+//   final Map<String, List<Todo>> categorizedTodos = {
+//     'active': [],
+//     'inactive': [],
+//   };
+
+//   for (final todo in todos) {
+//     if (todo.status == 'active') {
+//       categorizedTodos['active']?.add(todo);
+//     } else {
+//       categorizedTodos['inactive']?.add(todo);
+//     }
+//   }
+
+//   return categorizedTodos;
+// });
+
+
+// class TodoApp extends ConsumerWidget {
+//   @override
+//   Widget build(BuildContext context, ScopedReader watch) {
+//     final segment = watch(segmentProvider).state;
+//     final todosAsyncValue = watch(categorizedTodosProvider);
+
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(
+//           title: Text('TODO App'),
+//         ),
+//         body: todosAsyncValue.when(
+//           data: (categorizedTodos) {
+//             final todos = segment == 'active'
+//                 ? categorizedTodos['active']!
+//                 : categorizedTodos['inactive']!;
+            
+//             return Column(
+//               children: [
+//                 CupertinoSlidingSegmentedControl<String>(
+//                   groupValue: segment,
+//                   children: {
+//                     'active': Text('Active'),
+//                     'inactive': Text('Inactive'),
+//                   },
+//                   onValueChanged: (String? value) {
+//                     context.read(segmentProvider).state = value!;
+//                   },
+//                 ),
+//                 Expanded(
+//                   child: _buildTodoList(todos),
+//                 ),
+//               ],
+//             );
+//           },
+//           loading: () => Center(child: CircularProgressIndicator()),
+//           error: (error, stack) => Center(child: Text('Error: $error')),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildTodoList(List<Todo> todos) {
+//     return ListView.builder(
+//       itemCount: todos.length,
+//       itemBuilder: (context, index) {
+//         final todo = todos[index];
+//         return Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: ListTile(
+//             title: Text(todo.name),
+//             subtitle: Text(todo.description),
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }

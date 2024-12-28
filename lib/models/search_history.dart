@@ -1,23 +1,25 @@
 class SearchHistory {
   final String? photo;
   final String name;
-  final String? description;
-  final double price;
-  final String? location;
+  final String description;
+  final int price;
+  final String priceType;
+  final String location;
   final bool delivery;
   final String seller;
-  final String number;
+  final String phone;
   final String? whatsapp;
 
   SearchHistory({
     required this.name,
     this.photo,
     required this.price,
-    this.description,
-    this.location,
+    required this.priceType,
+    required this.description,
+    required this.location,
     required this.delivery,
     required this.seller,
-    required this.number,
+    required this.phone,
     this.whatsapp,
   });
 
@@ -25,12 +27,13 @@ class SearchHistory {
     return SearchHistory(
       name: json['name'],
       photo: json['photo'],
-      price: double.parse(json['price']),
+      price: json['price'],
+      priceType: json['price_type'],
       description: json['description'],
       location: json['location'],
       delivery: json['delivery'],
       seller: json['seller'],
-      number: json['number'],
+      phone: json['phone'],
       whatsapp: json['whatsapp'],
     );
   }

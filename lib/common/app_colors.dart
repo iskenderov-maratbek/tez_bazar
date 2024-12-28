@@ -14,4 +14,7 @@ class AppColors {
   static Color price = Colors.yellow;
   static Color whatasapp = Color.fromARGB(255, 37, 211, 102);
   static Color grey = Colors.grey;
+  static Color darkGrey = const Color.fromRGBO(33, 33, 33, 1);
+  static Color error = Colors.red;
+  static Color blueGrey = Colors.blueGrey;
 }

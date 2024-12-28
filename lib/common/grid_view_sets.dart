@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:tez_bazar/common/app_colors.dart';
 
 class GridViewSets {
-  static padding() => EdgeInsets.only(top: 180, bottom: 70);
+  static padding() => EdgeInsets.only(bottom: 150, top: 100);
   static itemImageBorderRadius({bool top = false}) => top
       ? BorderRadius.vertical(top: Radius.circular(10))
       : BorderRadius.vertical(bottom: Radius.circular(10));
+  static itemImageBorderRadiusAds({bool left = false}) => left
+      ? BorderRadius.horizontal(left: Radius.circular(10))
+      : BorderRadius.horizontal(right: Radius.circular(10));
   static itemInfoBackgroundColor() => LinearGradient(
         colors: [
           AppColors.white.withOpacity(.3),
@@ -23,5 +26,11 @@ class GridViewSets {
         crossAxisSpacing: 10, // Отступ между столбцами
         mainAxisSpacing: 10, // Отступ между строками
         childAspectRatio: 0.7, // Соотношение сторон элементов
+      );
+  static delegateCategory() => const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, // Количество столбцов
+        crossAxisSpacing: 10, // Отступ между столбцами
+        mainAxisSpacing: 10, // Отступ между строками
+        childAspectRatio: 1.1, // Соотношение сторон элементов
       );
 }

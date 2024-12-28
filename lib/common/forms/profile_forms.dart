@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_colors.dart';
 import 'package:tez_bazar/common/forms/text_forms.dart';
-import 'package:tez_bazar/providers/providers.dart';
 
 class TFForms extends ConsumerStatefulWidget {
   final TextEditingController controller;
@@ -11,14 +10,24 @@ class TFForms extends ConsumerStatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
   final int? maxLength;
+  final int? maxLines;
+  final String? label;
+  final String? helperText;
+  final Widget? suffix;
+  final FormFieldValidator? validator;
 
   const TFForms({
     super.key,
     this.maxLength,
+    this.suffix,
+    this.maxLines,
     required this.controller,
     this.inputFormatters,
     this.hintText,
     this.keyboardType,
+    this.label,
+    this.helperText,
+    this.validator,
   });
 
   @override
@@ -26,36 +35,48 @@ class TFForms extends ConsumerStatefulWidget {
 }
 
 class _TextFieldFormState extends ConsumerState<TFForms> {
-  Color? fillColor = Colors.grey[300];
-  Color? prefixColor = Colors.black;
-
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      textAlignVertical: TextAlignVertical.center,
-      validator: (value) {},
-      keyboardType: widget.keyboardType,
-      controller: widget.controller,
-      maxLength: widget.maxLength,
-      style: const TextStyle(
-        fontSize: 20,
-      ),
-      inputFormatters: widget.inputFormatters,
-      onFieldSubmitted: (value) {},
-      decoration: InputDecoration(
-        label: textForm('база', 15),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-        filled: true,
-        fillColor: fillColor,
-        isDense: true,
-        errorStyle: const TextStyle(color: Colors.red),
-        errorMaxLines: 2,
-        counterText: '',
-        hintText: widget.hintText,
-        hintStyle: const TextStyle(
-          color: Colors.black,
+    return Focus(
+      onFocusChange: (bool hasFocus) {
+        if (hasFocus) {}
+      },
+      child: TextFormField(
+        textAlignVertical: TextAlignVertical.center,
+        validator: widget.validator,
+        keyboardType: widget.keyboardType,
+        controller: widget.controller,
+        maxLength: widget.maxLength,
+        maxLines: widget.maxLines ?? 1,
+        style: TextStyle(
+          color: textColor,
           fontSize: 20,
-          // height: 1.6352,
+        ),
+        inputFormatters: widget.inputFormatters,
+        onFieldSubmitted: (value) {},
+        decoration: InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          label: widget.label != null
+              ? textForm(
+                  widget.label!,
+                  22,
+                  color: AppColors.primaryColor,
+                )
+              : null,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          filled: true,
+          fillColor: AppColors.white.withOpacity(.1),
+          isDense: true,
+          errorStyle: const TextStyle(color: Colors.red),
+          errorMaxLines: 2,
+          counterText: '',
+          suffix: widget.suffix,
+          hintText: widget.hintText,
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(.9),
+            fontSize: 20,
+          ),
         ),
       ),
     );

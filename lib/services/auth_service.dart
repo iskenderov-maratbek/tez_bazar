@@ -1,9 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tez_bazar/common/db_fields.dart';
+import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/network_data.dart';
 import 'package:tez_bazar/models/user.dart';
-import 'package:tez_bazar/providers/auth_provider.dart';
+import 'package:tez_bazar/providers/providers.dart';
+import 'package:tez_bazar/services/shared_prefs_service.dart';
+import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/views/body_switcher.dart';
 
 final authServiceProvider = StateNotifierProvider<AuthService, User?>((ref) {
   return AuthService(ref);
@@ -15,52 +20,94 @@ class AuthService extends StateNotifier<User?> {
   AuthService(this.ref) : super(null);
 
   Future<void> signInWithGoogle() async {
-    print('Signing in with Google...');
+    ref.read(loadingProvider.notifier).state = true;
+    logInfo('Signing in with Google...');
     final googleSignIn = ref.read(googleSignInProvider);
-    final authProvider = ref.read(authProviderState.notifier);
+    final authView = ref.read(authViewProvider.notifier);
+    final spProvider = ref.read(spServiceProvider);
 
     try {
-      print('Starting Google Sign In');
-      authProvider.state = AuthViewContent.authenticating;
-      print('authProvider: $authProvider');
       final googleUser = await googleSignIn.signIn();
+
       if (googleUser == null) {
-        authProvider.state = AuthViewContent.unauthenticated;
+        authView.state = AuthViewContent.error;
+        Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
+          ref.read(loadingProvider.notifier).state = false;
+        });
         return;
       }
       final googleAuth = await googleUser.authentication;
-      // Проверка токена на сервере (пример HTTP-запроса)
-      print('googleUser  : $googleUser');
+      logServer('Send Post Requests: /${DbFields.authWithGoogle}');
       final response = await http.post(
         Uri.parse(
           Network.getUrl(
-            path: 'authWithGoogle',
+            path: DbFields.authWithGoogle,
           ),
         ),
-        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'id': googleUser.id,
-          'name': googleUser.displayName,
-          'email': googleUser.email,
-          'photo': googleUser.photoUrl,
-          'accessToken': googleAuth.accessToken,
+          DbFields.userNAME: googleUser.displayName,
+          DbFields.userEMAIL: googleUser.email,
+          DbFields.userID: googleUser.id,
+          DbFields.userTOKEN: googleAuth.accessToken!
         }),
       );
       if (response.statusCode == 200) {
-        User user = User.fromJson(jsonDecode(response.body));
+        logServer('Response: OK');
+        await _getListOfCategories();
+        ref.read(isAuthenticatedProvider.notifier).state = true;
+        ref.read(appBarTitleProvider.notifier).state =
+            TextConstants.accountPageTitle;
+        final result = jsonDecode(response.body);
+        User user = User.fromJson(result);
+
         state = user;
-        authProvider.state = AuthViewContent.authenticated;
+        await spProvider.clearSP();
+        final String getToken = jsonDecode(response.body)['access_token'];
+        await spProvider.saveTokenSP(getToken);
+        authView.state = AuthViewContent.accountPage;
       } else {
-        authProvider.state = AuthViewContent.error;
+        authView.state = AuthViewContent.error;
       }
+      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
+        ref.read(loadingProvider.notifier).state = false;
+      });
     } catch (e) {
-      print('Error signing in with Google: $e');
-      authProvider.state = AuthViewContent.error;
+      logError('Error signing in with Google: $e');
+      authView.state = AuthViewContent.error;
+      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
+        ref.read(loadingProvider.notifier).state = false;
+      });
     }
   }
 
   Future<void> signOut() async {
-    final authProvider = ref.read(authProviderState.notifier);
-    authProvider.state = AuthViewContent.defaultState;
+    ref.read(loadingProvider.notifier).state = true;
+    await ref.read(spServiceProvider).clearSP();
+    ref.read(isAuthenticatedProvider.notifier).state = false;
+    ref.read(authViewProvider.notifier).state = AuthViewContent.signInPage;
+    Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
+      ref.read(loadingProvider.notifier).state = false;
+    });
+  }
+
+  _getListOfCategories() async {
+    try {
+      logServer('Send Post Requests: /${DbFields.allcategories}');
+      final response = await http.get(
+        Uri.parse(
+          Network.getUrl(
+            path: DbFields.allcategories,
+          ),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        logServer('Response category: OK');
+        final result = jsonDecode(response.body);
+        ref.read(categoriesProvider.notifier).state = result;
+      }
+    } catch (e) {
+      logError('Error: $e');
+    }
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 final Color textColor = Colors.white;
 
-textForm(
+Widget textForm(
   String text,
   double size, {
   Color? color,
@@ -11,11 +11,15 @@ textForm(
   FontWeight? weight,
   TextDecoration? decoration,
   Color? decorationColor,
+  int? maxLines,
+  bool italic = false,
 }) {
   return Text(
     text,
     textAlign: textAlign,
+    maxLines: maxLines,
     style: TextStyle(
+      fontStyle: italic ? FontStyle.italic : FontStyle.normal,
       fontSize: size,
       color: color ?? textColor,
       overflow: overflow,

@@ -9,18 +9,20 @@ import 'package:url_launcher/url_launcher.dart';
 class InfoView extends StatelessWidget {
   final String? photo;
   final String name;
-  final String? description;
-  final double price;
+  final String description;
+  final int price;
+  final String priceType;
   final String? location;
   final bool delivery;
   final String seller;
-  final String number;
+  final String? number;
   final String? whatsapp;
 
   const InfoView({
     super.key,
-    this.description,
-    this.location,
+    required this.description,
+    required this.location,
+    required this.priceType,
     required this.delivery,
     required this.seller,
     required this.name,
@@ -29,6 +31,9 @@ class InfoView extends StatelessWidget {
     required this.number,
     this.whatsapp,
   });
+
+  final double sizedBoxesHeight = 20;
+  final double sizedBoxesWidth = 10;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +49,7 @@ class InfoView extends StatelessWidget {
       filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
       child: Container(
         padding: const EdgeInsets.all(0),
-        color: Colors.transparent,
+        color: Colors.black.withOpacity(.6),
         child: Center(
           child: Scaffold(
             backgroundColor: AppColors.transparent,
@@ -59,7 +64,6 @@ class InfoView extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        textForm(name, 32, weight: FontWeight.bold),
                         const SizedBox(height: 16),
                         Align(
                           alignment: Alignment.center,
@@ -79,6 +83,9 @@ class InfoView extends StatelessWidget {
                             ),
                           ),
                         ),
+                        SizedBox(height: sizedBoxesHeight),
+                        textForm(name, 32, weight: FontWeight.bold),
+                        SizedBox(height: sizedBoxesHeight),
                         Align(
                           alignment: Alignment.centerRight,
                           child: Padding(
@@ -87,15 +94,16 @@ class InfoView extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   vertical: 2, horizontal: 10),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                // color: Colors.grey[300],
-                              ),
+                                  borderRadius: BorderRadius.circular(30),
+                                  color: AppColors.white.withOpacity(.2)),
+                              // color: Colors.grey[300],
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.baseline,
                                 textBaseline: TextBaseline.alphabetic,
                                 children: [
-                                  textForm('$price', 44,
+                                  textForm('$price', 34,
                                       weight: FontWeight.bold),
                                   SizedBox(
                                     width: 5,
@@ -104,6 +112,21 @@ class InfoView extends StatelessWidget {
                                     padding: const EdgeInsets.only(top: 20),
                                     child: setCurrency(15),
                                   ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  textForm(
+                                    '| ',
+                                    30,
+                                    weight: FontWeight.bold,
+                                    color: AppColors.primaryColor,
+                                  ),
+                                  textForm(
+                                    getPriceType(priceType),
+                                    22,
+                                    weight: FontWeight.bold,
+                                    color: AppColors.primaryColor,
+                                  ),
                                 ],
                               ),
                             ),
@@ -111,7 +134,7 @@ class InfoView extends StatelessWidget {
                         ),
                         Card(
                           elevation: 3,
-                          color: AppColors.backgroundColor.withOpacity(.9),
+                          color: AppColors.white.withOpacity(.2),
                           margin: const EdgeInsets.symmetric(vertical: 0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5),
@@ -126,7 +149,7 @@ class InfoView extends StatelessWidget {
                                   height: 5,
                                 ),
                                 textForm(
-                                  description ?? 'Кошумча маалымат жок',
+                                  description,
                                   20,
                                 ),
                               ],
@@ -139,7 +162,7 @@ class InfoView extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          color: AppColors.backgroundColor.withOpacity(.9),
+                          color: AppColors.white.withOpacity(.1),
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: Column(
@@ -150,7 +173,7 @@ class InfoView extends StatelessWidget {
                                   children: [
                                     Icon(
                                       Icons.person_rounded,
-                                      size: 25,
+                                      size: 30,
                                       color: AppColors.primaryColor,
                                     ),
                                     const SizedBox(width: 8),
@@ -165,15 +188,14 @@ class InfoView extends StatelessWidget {
                                   children: [
                                     Icon(
                                       Icons.location_on_rounded,
-                                      size: 25,
+                                      size: 30,
                                       color: AppColors.green,
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: textForm(
-                                          location ??
-                                              'Дареги жонундо маалымат жок',
-                                          16),
+                                          location ?? TextConstants.noAddress,
+                                          18),
                                     ),
                                   ],
                                 ),
@@ -321,6 +343,19 @@ class InfoView extends StatelessWidget {
     );
   }
 
+  getPriceType(priceType) {
+    switch (priceType) {
+      case 'Pcs':
+        return TextConstants.priceTypePieces;
+      case 'Lts':
+        return TextConstants.priceTypeLts;
+      case 'Kgs':
+        return TextConstants.priceTypeKgs;
+      default:
+        return '';
+    }
+  }
+
   void _toWhatsapp(String number) async {
     Uri whatsapp = Uri.parse("https://wa.me/${number.substring(1)}");
     await launchUrl(
@@ -328,10 +363,12 @@ class InfoView extends StatelessWidget {
     );
   }
 
-  void _toPhone(String number) async {
-    Uri phone = Uri.parse("tel:$number");
-    await launchUrl(
-      phone,
-    );
+  void _toPhone(String? number) async {
+    if (number != null) {
+      Uri phone = Uri.parse("tel:$number");
+      await launchUrl(
+        phone,
+      );
+    }
   }
 }

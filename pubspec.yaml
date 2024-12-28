@@ -40,6 +40,10 @@ dependencies:
   flutter_riverpod: ^2.6.1
   google_sign_in: ^6.2.2
   url_launcher: ^6.3.1
+  shared_preferences: ^2.3.3
+  flutter_keyboard_visibility: ^6.0.0
+  image_picker: ^1.1.2
+  ansicolor: ^2.0.3
 
 dev_dependencies:
   flutter_test:
