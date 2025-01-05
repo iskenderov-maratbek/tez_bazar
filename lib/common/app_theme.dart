@@ -39,5 +39,16 @@ ThemeData themeData(BuildContext context) {
       backgroundColor: Colors.black,
       surfaceTintColor: Colors.transparent,
     ),
+    iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      backgroundColor: WidgetStateProperty.all(AppColors.transparent),
+    )),
+    popupMenuTheme: PopupMenuThemeData(
+      color: Colors.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+    ),
   );
 }

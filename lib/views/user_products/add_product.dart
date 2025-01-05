@@ -6,64 +6,45 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_colors.dart';
 import 'package:tez_bazar/common/forms/profile_forms.dart';
 import 'package:tez_bazar/common/forms/text_forms.dart';
-import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/misc.dart';
 import 'package:tez_bazar/common/validators.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/services/user_service.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 
-class AddEditView extends ConsumerStatefulWidget {
-  final int id;
-  final String name;
-  final int price;
-  final String priceType;
-  final String? photo;
-  final String description;
-  final bool delivery;
-  final String location;
-  final int categoryId;
-
-  const AddEditView({
+class AddAds extends ConsumerStatefulWidget {
+  const AddAds({
     super.key,
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.priceType,
-    required this.categoryId,
-    this.photo,
-    required this.description,
-    required this.delivery,
-    required this.location,
   });
 
   @override
-  ConsumerState<AddEditView> createState() => _AddAdsState();
+  ConsumerState<AddAds> createState() => _AddAdsState();
 }
 
-class _AddAdsState extends ConsumerState<AddEditView> {
+class _AddAdsState extends ConsumerState<AddAds> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  bool delivery = false;
   final double sizedBoxesHeight = 30;
   final double sizedBoxesWidth = 10;
-  late String? _selectedPriceType;
-  File? _image;
+  late String _selectedPriceType;
+  final List<String> _itemsPriceType = [
+    TextConstants.priceTypePieces,
+    TextConstants.priceTypeLts,
+    TextConstants.priceTypeKgs,
+  ];
   late String? _selectedCategory;
   late final Map<String, dynamic> _itemsCategories;
-  late bool delivery;
+  File? _image;
+
   @override
   void initState() {
-    _selectedPriceType = widget.priceType;
-    _itemsCategories = ref.read(categoriesProvider);
-    _nameController.text = widget.name;
-    _descriptionController.text = widget.description;
-    _locationController.text = widget.location;
-    _priceController.text = widget.price.toString();
-    _selectedCategory = widget.categoryId.toString();
-    delivery = widget.delivery;
+    _selectedCategory = '1';
+    _selectedPriceType = _itemsPriceType[0];
+    _itemsCategories = ref.read(listOfCategoriesProvider);
     super.initState();
   }
 
@@ -79,7 +60,6 @@ class _AddAdsState extends ConsumerState<AddEditView> {
 
   @override
   Widget build(BuildContext context) {
-    logView(runtimeType);
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
       child: Container(
@@ -102,7 +82,7 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     textForm(
-                      TextConstants.editAddTitle,
+                      TextConstants.addNewAddTitle,
                       30,
                       color: AppColors.primaryColor,
                       weight: FontWeight.bold,
@@ -123,16 +103,14 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                             elevation: 15,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(5),
-                              child: widget.photo != null
-                                  ? Image.network(widget.photo!)
-                                  : _image != null
-                                      ? Image.file(
-                                          _image!,
-                                          width: 250,
-                                          height: 250,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : noImg(width: 250),
+                              child: _image != null
+                                  ? Image.file(
+                                      _image!,
+                                      width: 250,
+                                      height: 250,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : noImg(width: 250, height: 250),
                             ),
                           ),
                         ),
@@ -194,9 +172,7 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                             horizontal: 10,
                             vertical: 5,
                           ),
-                          menuWidth: 350,
-                          menuMaxHeight: 500,
-                          dropdownColor: AppColors.darkGrey,
+                          dropdownColor: AppColors.backgroundColor,
                           underline: Container(),
                           borderRadius: BorderRadius.circular(12),
                           value: _selectedCategory,
@@ -210,10 +186,7 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                               .map<DropdownMenuItem<String>>((entry) {
                             return DropdownMenuItem<String>(
                               value: entry.key,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: textForm(entry.value, 22),
-                              ),
+                              child: textForm(entry.value, 18),
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
@@ -224,7 +197,6 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                           hint: Text('Выберите категорию'),
                         ),
                       ),
-                      //
                     ),
                     SizedBox(height: sizedBoxesHeight),
                     TFForms(
@@ -244,7 +216,6 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                             label: TextConstants.price,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(9),
                             ],
                             keyboardType: TextInputType.number,
                             validator: Validators.validateNotEmpty,
@@ -282,7 +253,7 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                               EdgeInsets.symmetric(vertical: 1, horizontal: 15),
                           child: DropdownButton(
                             padding: EdgeInsets.all(5),
-                            dropdownColor: AppColors.darkGrey,
+                            dropdownColor: AppColors.backgroundColor,
                             borderRadius: BorderRadius.circular(12),
                             underline: Container(),
                             icon: Icon(
@@ -291,7 +262,7 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                               color: AppColors.primaryColor,
                             ),
                             value: _selectedPriceType,
-                            items: TextConstants.itemsPriceType.map((item) {
+                            items: _itemsPriceType.map((item) {
                               return DropdownMenuItem<String>(
                                 alignment: Alignment.centerLeft,
                                 value: item,
@@ -308,7 +279,7 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                             onChanged: (String? newValue) {
                               setState(() {
                                 _selectedPriceType =
-                                    newValue ?? TextConstants.itemsPriceType[0];
+                                    newValue ?? _itemsPriceType[0];
                               });
                             },
                           ),
@@ -356,7 +327,7 @@ class _AddAdsState extends ConsumerState<AddEditView> {
                       height: sizedBoxesHeight,
                     ),
                     ElevatedButton(
-                      onPressed: _editComplete,
+                      onPressed: _addComplete,
                       style: ElevatedButton.styleFrom(
                         padding:
                             EdgeInsets.symmetric(vertical: 20, horizontal: 10),
@@ -381,20 +352,25 @@ class _AddAdsState extends ConsumerState<AddEditView> {
     );
   }
 
-  _editComplete() async {
+  _addComplete() {
     if (_formKey.currentState!.validate()) {
-      ref.read(userServiceProvider.notifier).editAd(
-            id: widget.id,
+      if (_image == null) {
+        ref.read(errorDialogMessageProvider.notifier).state =
+            'Жарнаманын суротуну кошууну унутпаныз';
+        ref.read(errorDialogProvider.notifier).state = true;
+        return;
+      }
+      ref.read(userServiceProvider.notifier).addAd(
             image: _image,
             name: _nameController.text.trim(),
             description: _descriptionController.text.trim(),
             price: int.parse(_priceController.text.trim()),
-            priceType: _selectedPriceType ?? TextConstants.priceTypePieces,
+            priceType: _selectedPriceType,
             location: _locationController.text.trim(),
             delivery: delivery,
             categoryId: int.parse(_selectedCategory!),
           );
+      Navigator.pop(context);
     }
-    Navigator.pop(context);
   }
 }

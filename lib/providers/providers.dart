@@ -1,27 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:tez_bazar/models/ads.dart';
+import 'package:tez_bazar/models/banners.dart';
+import 'package:tez_bazar/models/user_products.dart';
 
 import 'package:tez_bazar/models/categories.dart';
 import 'package:tez_bazar/models/products.dart';
 import 'package:tez_bazar/models/search_history.dart';
-import 'package:tez_bazar/services/ads_service.dart';
+import 'package:tez_bazar/services/banners_service.dart';
+import 'package:tez_bazar/services/main_page_service.dart';
+import 'package:tez_bazar/services/user_product_service.dart';
 import 'package:tez_bazar/services/category_service.dart';
 import 'package:tez_bazar/services/image_service.dart';
 import 'package:tez_bazar/services/product_service.dart';
+import 'package:tez_bazar/services/request_service.dart';
 import 'package:tez_bazar/services/search_service.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 
-// Модель данных
-
-// Провайдер для получения данных с пагинацией
-final categoryProvider =
-    StateNotifierProvider<CategoryService, List<Category>>((ref) {
-  return CategoryService(ref);
+final requestServiceProvider = Provider<RequestService>((ref) {
+  return RequestService(ref);
 });
 
-final adsProvider = StateNotifierProvider<AdsService, List<Ads>>((ref) {
-  return AdsService();
+final mainServiceProvider = Provider<MainService>((ref) {
+  return MainService(ref);
+});
+
+final categoriesProvider =
+    StateNotifierProvider<CategoriesService, List<Category>>((ref) {
+  return CategoriesService(ref);
+});
+
+final bannersProvider =
+    StateNotifierProvider<BannersService, List<Banners>>((ref) {
+  return BannersService(ref);
+});
+
+final userProductProvider =
+    StateNotifierProvider<UserProductService, List<UserProducts>>((ref) {
+  return UserProductService(ref);
 });
 
 final productProvider =
@@ -36,9 +51,9 @@ final searchProvider =
 
 // Провайдер для состояния авторизации
 
-enum BottomSelectedMenu { home, ads, account }
+enum BottomSelectedMenu { home, userProducts, account }
 
-final bottomSelectedProvider =
+final routeProvider =
     StateProvider<BottomSelectedMenu>((ref) => BottomSelectedMenu.home);
 
 enum GridPage { category, product, search }
@@ -50,16 +65,6 @@ final appBarTitleProvider =
     StateProvider<String?>((ref) => TextConstants.homeTitle);
 
 final isAuthenticatedProvider = StateProvider<bool>((ref) => false);
-
-enum AuthViewContent {
-  accountPage,
-  signInPage,
-  error,
-  profile,
-}
-
-final authViewProvider =
-    StateProvider<AuthViewContent>((ref) => AuthViewContent.signInPage);
 
 final googleSignInProvider = Provider<GoogleSignIn>(
   (ref) {
@@ -83,7 +88,8 @@ final loadingProvider = StateProvider<bool>((ref) {
   return false;
 });
 
-final categoriesProvider = StateProvider<Map<String, dynamic>>((ref) => {});
+final listOfCategoriesProvider =
+    StateProvider<Map<String, dynamic>>((ref) => {});
 
 final loadTimer = StateProvider<int>((ref) => 1);
 
@@ -96,3 +102,13 @@ final errorDialogProvider = StateProvider<bool>((ref) => false);
 final errorDialogMessageProvider = StateProvider<String?>((ref) => null);
 
 final refreshTimerProvider = Provider<int>((ref) => 1);
+
+// Провайдер для состояния аккаунта
+enum AccountState { account, profile }
+
+final accountStateProvider =
+    StateProvider<AccountState>((ref) => AccountState.account);
+
+enum HomeState { home, category, search }
+
+final homeStateProvider = StateProvider<HomeState>((ref) => HomeState.home);

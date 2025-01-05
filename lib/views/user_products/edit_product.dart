@@ -6,45 +6,64 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_colors.dart';
 import 'package:tez_bazar/common/forms/profile_forms.dart';
 import 'package:tez_bazar/common/forms/text_forms.dart';
+import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/misc.dart';
 import 'package:tez_bazar/common/validators.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/services/user_service.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 
-class AddAds extends ConsumerStatefulWidget {
-  const AddAds({
+class AddEditView extends ConsumerStatefulWidget {
+  final int id;
+  final String name;
+  final int price;
+  final String priceType;
+  final String? photo;
+  final String description;
+  final bool delivery;
+  final String location;
+  final int categoryId;
+
+  const AddEditView({
     super.key,
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.priceType,
+    required this.categoryId,
+    this.photo,
+    required this.description,
+    required this.delivery,
+    required this.location,
   });
 
   @override
-  ConsumerState<AddAds> createState() => _AddAdsState();
+  ConsumerState<AddEditView> createState() => _AddAdsState();
 }
 
-class _AddAdsState extends ConsumerState<AddAds> {
+class _AddAdsState extends ConsumerState<AddEditView> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  bool delivery = false;
   final double sizedBoxesHeight = 30;
   final double sizedBoxesWidth = 10;
-  late String _selectedPriceType;
-  final List<String> _itemsPriceType = [
-    TextConstants.priceTypePieces,
-    TextConstants.priceTypeLts,
-    TextConstants.priceTypeKgs,
-  ];
+  late String? _selectedPriceType;
+  File? _image;
   late String? _selectedCategory;
   late final Map<String, dynamic> _itemsCategories;
-  File? _image;
-
+  late bool delivery;
   @override
   void initState() {
-    _selectedCategory = '1';
-    _selectedPriceType = _itemsPriceType[0];
-    _itemsCategories = ref.read(categoriesProvider);
+    _selectedPriceType = widget.priceType;
+    _itemsCategories = ref.read(listOfCategoriesProvider);
+    _nameController.text = widget.name;
+    _descriptionController.text = widget.description;
+    _locationController.text = widget.location;
+    _priceController.text = widget.price.toString();
+    _selectedCategory = widget.categoryId.toString();
+    delivery = widget.delivery;
     super.initState();
   }
 
@@ -60,6 +79,7 @@ class _AddAdsState extends ConsumerState<AddAds> {
 
   @override
   Widget build(BuildContext context) {
+    logView(runtimeType);
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
       child: Container(
@@ -70,10 +90,10 @@ class _AddAdsState extends ConsumerState<AddAds> {
             backgroundColor: AppColors.transparent,
             body: SingleChildScrollView(
               padding: const EdgeInsets.only(
-                top: 150,
+                top: 80,
                 left: 10,
                 right: 10,
-                bottom: 100,
+                bottom: 50,
               ),
               child: Form(
                 key: _formKey,
@@ -82,7 +102,7 @@ class _AddAdsState extends ConsumerState<AddAds> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     textForm(
-                      TextConstants.addNewAddTitle,
+                      TextConstants.editAddTitle,
                       30,
                       color: AppColors.primaryColor,
                       weight: FontWeight.bold,
@@ -103,14 +123,16 @@ class _AddAdsState extends ConsumerState<AddAds> {
                             elevation: 15,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(5),
-                              child: _image != null
-                                  ? Image.file(
-                                      _image!,
-                                      width: 250,
-                                      height: 250,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : noImg(width: 250, height: 250),
+                              child: widget.photo != null
+                                  ? Image.network(widget.photo!)
+                                  : _image != null
+                                      ? Image.file(
+                                          _image!,
+                                          width: 250,
+                                          height: 250,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : noImg(width: 250),
                             ),
                           ),
                         ),
@@ -172,7 +194,9 @@ class _AddAdsState extends ConsumerState<AddAds> {
                             horizontal: 10,
                             vertical: 5,
                           ),
-                          dropdownColor: AppColors.darkGrey,
+                          menuWidth: 350,
+                          menuMaxHeight: 500,
+                          dropdownColor: AppColors.backgroundColor,
                           underline: Container(),
                           borderRadius: BorderRadius.circular(12),
                           value: _selectedCategory,
@@ -186,7 +210,10 @@ class _AddAdsState extends ConsumerState<AddAds> {
                               .map<DropdownMenuItem<String>>((entry) {
                             return DropdownMenuItem<String>(
                               value: entry.key,
-                              child: textForm(entry.value, 18),
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: textForm(entry.value, 22),
+                              ),
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
@@ -197,6 +224,7 @@ class _AddAdsState extends ConsumerState<AddAds> {
                           hint: Text('Выберите категорию'),
                         ),
                       ),
+                      //
                     ),
                     SizedBox(height: sizedBoxesHeight),
                     TFForms(
@@ -216,6 +244,7 @@ class _AddAdsState extends ConsumerState<AddAds> {
                             label: TextConstants.price,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(9),
                             ],
                             keyboardType: TextInputType.number,
                             validator: Validators.validateNotEmpty,
@@ -250,10 +279,10 @@ class _AddAdsState extends ConsumerState<AddAds> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding:
-                              EdgeInsets.symmetric(vertical: 1, horizontal: 15),
+                              EdgeInsets.symmetric(vertical: 0, horizontal: 15),
                           child: DropdownButton(
-                            padding: EdgeInsets.all(5),
-                            dropdownColor: AppColors.darkGrey,
+                            padding: EdgeInsets.all(4),
+                            dropdownColor: AppColors.backgroundColor,
                             borderRadius: BorderRadius.circular(12),
                             underline: Container(),
                             icon: Icon(
@@ -262,16 +291,17 @@ class _AddAdsState extends ConsumerState<AddAds> {
                               color: AppColors.primaryColor,
                             ),
                             value: _selectedPriceType,
-                            items: _itemsPriceType.map((item) {
+                            items: TextConstants.itemsPriceType.map((item) {
                               return DropdownMenuItem<String>(
                                 alignment: Alignment.centerLeft,
                                 value: item,
                                 child: SizedBox(
+                                  width: 60,
                                   child: textForm(
                                     item,
                                     20,
                                     color: AppColors.white,
-                                    textAlign: TextAlign.center,
+                                    // textAlign: TextAlign.center,
                                   ),
                                 ),
                               );
@@ -279,7 +309,7 @@ class _AddAdsState extends ConsumerState<AddAds> {
                             onChanged: (String? newValue) {
                               setState(() {
                                 _selectedPriceType =
-                                    newValue ?? _itemsPriceType[0];
+                                    newValue ?? TextConstants.itemsPriceType[0];
                               });
                             },
                           ),
@@ -327,7 +357,7 @@ class _AddAdsState extends ConsumerState<AddAds> {
                       height: sizedBoxesHeight,
                     ),
                     ElevatedButton(
-                      onPressed: _addComplete,
+                      onPressed: _editComplete,
                       style: ElevatedButton.styleFrom(
                         padding:
                             EdgeInsets.symmetric(vertical: 20, horizontal: 10),
@@ -352,25 +382,20 @@ class _AddAdsState extends ConsumerState<AddAds> {
     );
   }
 
-  _addComplete() {
+  _editComplete() async {
     if (_formKey.currentState!.validate()) {
-      if (_image == null) {
-        ref.read(errorDialogMessageProvider.notifier).state =
-            'Жарнаманын суротуну кошууну унутпаныз';
-ref.read(errorDialogProvider.notifier).state = true; 
-        return;
-      }
-      ref.read(userServiceProvider.notifier).addAd(
+      ref.read(userServiceProvider.notifier).editProduct(
+            id: widget.id,
             image: _image,
             name: _nameController.text.trim(),
             description: _descriptionController.text.trim(),
             price: int.parse(_priceController.text.trim()),
-            priceType: _selectedPriceType,
+            priceType: _selectedPriceType ?? TextConstants.priceTypePieces,
             location: _locationController.text.trim(),
             delivery: delivery,
             categoryId: int.parse(_selectedCategory!),
           );
-      Navigator.pop(context);
     }
+    Navigator.pop(context);
   }
 }

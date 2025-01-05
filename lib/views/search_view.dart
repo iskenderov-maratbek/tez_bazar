@@ -6,7 +6,7 @@ import 'package:tez_bazar/common/forms/text_forms.dart';
 import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/common/grid_view_sets.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 import 'package:tez_bazar/views/info_view.dart';
 
 class SearchView extends ConsumerStatefulWidget {
@@ -137,7 +137,7 @@ class SearchPageState extends ConsumerState<SearchView> {
                   child: Container(
                     decoration: BoxDecoration(
                         borderRadius: GridViewSets.itemImageBorderRadius(),
-                        color: AppColors.darkGrey),
+                        color: AppColors.backgroundColor),
                     child: Stack(
                       children: [
                         Positioned(

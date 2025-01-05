@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/common/db_fields.dart';
+import 'package:tez_bazar/constants/db_fields.dart';
 import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/network_data.dart';
 import 'package:tez_bazar/models/user.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/services/shared_prefs_service.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
-import 'package:tez_bazar/views/body_switcher.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 
 final authServiceProvider = StateNotifierProvider<AuthService, User?>((ref) {
   return AuthService(ref);
@@ -23,14 +22,14 @@ class AuthService extends StateNotifier<User?> {
     ref.read(loadingProvider.notifier).state = true;
     logInfo('Signing in with Google...');
     final googleSignIn = ref.read(googleSignInProvider);
-    final authView = ref.read(authViewProvider.notifier);
+    final accountState = ref.read(accountStateProvider.notifier);
     final spProvider = ref.read(spServiceProvider);
 
     try {
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        authView.state = AuthViewContent.error;
+
         Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
           ref.read(loadingProvider.notifier).state = false;
         });
@@ -64,16 +63,13 @@ class AuthService extends StateNotifier<User?> {
         await spProvider.clearSP();
         final String getToken = jsonDecode(response.body)['access_token'];
         await spProvider.saveTokenSP(getToken);
-        authView.state = AuthViewContent.accountPage;
-      } else {
-        authView.state = AuthViewContent.error;
-      }
+        accountState.state = AccountState.account;
+      } else {}
       Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
         ref.read(loadingProvider.notifier).state = false;
       });
     } catch (e) {
       logError('Error signing in with Google: $e');
-      authView.state = AuthViewContent.error;
       Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
         ref.read(loadingProvider.notifier).state = false;
       });
@@ -84,7 +80,6 @@ class AuthService extends StateNotifier<User?> {
     ref.read(loadingProvider.notifier).state = true;
     await ref.read(spServiceProvider).clearSP();
     ref.read(isAuthenticatedProvider.notifier).state = false;
-    ref.read(authViewProvider.notifier).state = AuthViewContent.signInPage;
     Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
       ref.read(loadingProvider.notifier).state = false;
     });
@@ -104,7 +99,7 @@ class AuthService extends StateNotifier<User?> {
       if (response.statusCode == 200) {
         logServer('Response category: OK');
         final result = jsonDecode(response.body);
-        ref.read(categoriesProvider.notifier).state = result;
+        ref.read(listOfCategoriesProvider.notifier).state = result;
       }
     } catch (e) {
       logError('Error: $e');

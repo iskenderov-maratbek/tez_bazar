@@ -1,164 +1,144 @@
-// import 'dart:ui';
+import 'dart:ui';
 
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:tez_bazar/common/forms/loading.dart';
-// import 'package:tez_bazar/common/forms/text_forms.dart';
-// import 'package:tez_bazar/common/logging.dart';
-// import 'package:tez_bazar/texts/text_constants.dart';
-// import 'package:tez_bazar/views/category_view.dart';
-// import 'package:tez_bazar/views/home/app_bar.dart';
-// import 'package:tez_bazar/views/home/bottom_bar.dart';
-// import 'package:tez_bazar/common/app_colors.dart';
-// import 'package:tez_bazar/views/body_switcher.dart';
-// import 'package:tez_bazar/providers/providers.dart';
-// import 'package:tez_bazar/views/user_ads/ads_view.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tez_bazar/common/forms/loading.dart';
+import 'package:tez_bazar/common/forms/text_forms.dart';
+import 'package:tez_bazar/common/logging.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
+import 'package:tez_bazar/common/app_colors.dart';
+import 'package:tez_bazar/providers/providers.dart';
+import 'package:tez_bazar/services/refresh_service.dart';
+import 'package:tez_bazar/views/main/carousel_main.dart';
+import 'package:tez_bazar/views/main/category_view.dart';
+import 'package:tez_bazar/views/page_builder.dart';
 
-// class HomeView extends ConsumerStatefulWidget {
-//   const HomeView({super.key});
-//   @override
-//   ConsumerState<HomeView> createState() => _HomeState();
-// }
+class HomeView extends ConsumerStatefulWidget {
+  const HomeView({super.key});
+  @override
+  ConsumerState<HomeView> createState() => _HomeState();
+}
 
-// class _HomeState extends ConsumerState<HomeView>
-//     with SingleTickerProviderStateMixin {
-//   TextEditingController controller = TextEditingController();
-//   ScrollController scrollController = ScrollController();
-//   late AnimationController _animationController;
-//   bool isSnackBarVisible = false;
-//   OverlayEntry? overlayEntry;
+class _HomeState extends ConsumerState<HomeView>
+    with SingleTickerProviderStateMixin {
+  TextEditingController controller = TextEditingController();
+  ScrollController scrollController = ScrollController();
+  late AnimationController _animationController;
+  bool isSnackBarVisible = false;
+  OverlayEntry? overlayEntry;
+  int _selectedIndex = 0;
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     _animationController = AnimationController(
-//       duration: const Duration(seconds: 3),
-//       vsync: this,
-//     );
-//   }
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+  }
 
-//   void showOverlay(BuildContext context, String dialogText) {
-//     OverlayEntry overlayEntry = OverlayEntry(
-//       builder: (context) => Material(
-//         color: Colors.transparent,
-//         child: Container(
-//           width: double.infinity,
-//           height: double.infinity,
-//           padding: const EdgeInsets.symmetric(horizontal: 20),
-//           color: Colors.black.withOpacity(0.9),
-//           child: Align(
-//             alignment: Alignment.center,
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               mainAxisSize: MainAxisSize.min,
-//               children: [
-//                 Icon(
-//                   Icons.error_rounded,
-//                   color: AppColors.primaryColor,
-//                   size: 50,
-//                 ),
-//                 Expanded(
-//                   child: textForm(dialogText, 22, textAlign: TextAlign.center),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       Overlay.of(context).insert(overlayEntry);
-//     });
-//     Future.delayed(Duration(seconds: 3), () {
-//       overlayEntry.remove();
-//       ref.read(errorDialogProvider.notifier).state = false;
-//     });
-//   }
+  void showOverlay(BuildContext context, String dialogText) {
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Material(
+        color: Colors.transparent,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          color: Colors.black.withOpacity(0.9),
+          child: Align(
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_rounded,
+                  color: AppColors.primaryColor,
+                  size: 50,
+                ),
+                Expanded(
+                  child: textForm(dialogText, 22, textAlign: TextAlign.center),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Overlay.of(context).insert(overlayEntry);
+    });
+    Future.delayed(Duration(seconds: 3), () {
+      overlayEntry.remove();
+      ref.read(errorDialogProvider.notifier).state = false;
+    });
+  }
 
-//   @override
-//   void dispose() {
-//     _animationController.dispose();
-//     super.dispose();
-//   }
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     logInfo(ModalRoute.of(context)?.settings.name);
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
-//     final authView = ref.watch(authViewProvider);
-//     final bottomMenu = ref.watch(bottomSelectedProvider);
-//     final gridViewState = ref.watch(gridViewStateProvider);
-//     final loadingVisible = ref.watch(loadingProvider);
-//     final errorDialog = ref.watch(errorDialogProvider);
-//     final dialogText = ref.watch(errorDialogMessageProvider);
-//     errorDialog ? showOverlay(context, dialogText ?? '') : null;
-//     return PopScope(
-//       canPop: false,
-//       onPopInvokedWithResult: (didPop, result) {
-//         logInfo(
-//             'Popped: $didPop, Result: $result Grid View State: $gridViewState, Current Index: $bottomMenu');
-//       },
-//       child: SafeArea(
-//         child: Scaffold(
-//           backgroundColor: AppColors.backgroundColor,
-//           resizeToAvoidBottomInset: bottomMenu == BottomSelectedMenu.home,
-//           body: Stack(
-//             children: [
-//               Padding(
-//                 padding: const EdgeInsets.symmetric(horizontal: 5),
-//                 child: MainView(),
-//               ),
-//               Align(
-//                 alignment: Alignment.topCenter,
-//                 child: const CustomAppBar(),
-//               ),
-//               Positioned(
-//                 bottom: 0,
-//                 left: 0,
-//                 right: 0,
-//                 child: const CustomBottomBar(),
-//               ),
-//               Visibility(
-//                 visible: loadingVisible,
-//                 child: Positioned(
-//                   bottom: 0,
-//                   left: 0,
-//                   right: 0,
-//                   top: 0,
-//                   child: BackdropFilter(
-//                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-//                     child: Container(
-//                       decoration: BoxDecoration(
-//                         color: AppColors.black.withOpacity(.4),
-//                       ),
-//                       child: loadingCircle(),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
+  @override
+  Widget build(BuildContext context) {
+    logInfo(ModalRoute.of(context)?.settings.name);
+    logView('HomeView');
+    final errorDialog = ref.watch(errorDialogProvider);
+    final dialogText = ref.watch(errorDialogMessageProvider);
+    errorDialog ? showOverlay(context, dialogText ?? '') : null;
+    return PageBuilder(
+      onRefresh: () async {
+        ref.read(mainServiceProvider).getMainData();
+      },
+      child: ListView(
+        children: [
+          SizedBox(height: 10),
+          CarouselMainView(),
+          // PinButtons(),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(.1),
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                textForm(TextConstants.categories, 22),
+                SizedBox(height: 20),
+                CategoryView(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-//   Widget _buildBody(BottomSelectedMenu currentIndex,
-//       AuthViewContent isAuthenticated, ScrollController scrollController) {
-//     _animationController.reset();
-//     _animationController.forward();
-//     return AnimatedSwitcher(
-//       duration: const Duration(milliseconds: 300),
-//       transitionBuilder: (Widget child, Animation<double> animation) {
-//         return FadeTransition(opacity: animation, child: child);
-//       },
-//       child: switch (currentIndex) {
-//         BottomSelectedMenu.home => BodySwitcher(selectedState: currentIndex),
-//         BottomSelectedMenu.account => BodySwitcher(selectedState: currentIndex),
-//         BottomSelectedMenu.ads => const AdsView(),
-//       },
-//     );
-//   }
+  // Widget _buildBody(BottomSelectedMenu currentIndex,
+  //     AuthViewContent isAuthenticated, ScrollController scrollController) {
+  //   _animationController.reset();
+  //   _animationController.forward();
+  //   return AnimatedSwitcher(
+  //     duration: const Duration(milliseconds: 300),
+  //     transitionBuilder: (Widget child, Animation<double> animation) {
+  //       return FadeTransition(opacity: animation, child: child);
+  //     },
+  //     child: switch (currentIndex) {
+  //       BottomSelectedMenu.home => Router(selectedState: currentIndex),
+  //       BottomSelectedMenu.account => Router(selectedState: currentIndex),
+  //       BottomSelectedMenu.userProducts => const AdsView(),
+  //     },
+  //   );
+  // }
 
 //   void _popSystem(bottomMenu, gridViewState, authView) {
 //     switch (bottomMenu) {
@@ -174,20 +154,18 @@
 //           ref.read(gridViewStateProvider.notifier).state = GridPage.category;
 //           break;
 //         }
-//       case BottomSelectedMenu.ads:
+//       case BottomSelectedMenu.userProducts:
 //         switch (gridViewState) {
 //           case GridPage.product:
 //             ref.read(appBarTitleProvider.notifier).state =
 //                 ref.read(productProvider.notifier).getSelectedCategory();
-//             ref.read(bottomSelectedProvider.notifier).state =
-//                 BottomSelectedMenu.home;
+//             ref.read(routeProvider.notifier).state = BottomSelectedMenu.home;
 //             break;
 
 //           default:
 //             ref.read(appBarTitleProvider.notifier).state =
 //                 TextConstants.homeTitle;
-//             ref.read(bottomSelectedProvider.notifier).state =
-//                 BottomSelectedMenu.home;
+//             ref.read(routeProvider.notifier).state = BottomSelectedMenu.home;
 //         }
 //         break;
 //       case BottomSelectedMenu.account:
@@ -203,22 +181,23 @@
 //               case GridPage.product:
 //                 ref.read(appBarTitleProvider.notifier).state =
 //                     ref.read(productProvider.notifier).getSelectedCategory();
-//                 ref.read(bottomSelectedProvider.notifier).state =
+//                 ref.read(routeProvider.notifier).state =
 //                     BottomSelectedMenu.home;
 //               case GridPage.search:
 //                 ref.read(appBarTitleProvider.notifier).state =
 //                     ref.read(searchProvider.notifier).getSearchValue();
-//                 ref.read(bottomSelectedProvider.notifier).state =
+//                 ref.read(routeProvider.notifier).state =
 //                     BottomSelectedMenu.home;
 //                 break;
 
 //               default:
 //                 ref.read(appBarTitleProvider.notifier).state =
 //                     TextConstants.homeTitle;
-//                 ref.read(bottomSelectedProvider.notifier).state =
+//                 ref.read(routeProvider.notifier).state =
 //                     BottomSelectedMenu.home;
 //             }
 //         }
 //     }
 //   }
 // }
+}

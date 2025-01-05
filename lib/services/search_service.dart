@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/common/db_fields.dart';
+import 'package:tez_bazar/constants/db_fields.dart';
 import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/network_data.dart';
 import 'package:tez_bazar/models/search_history.dart';

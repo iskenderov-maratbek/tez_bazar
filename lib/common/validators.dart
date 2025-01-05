@@ -1,4 +1,4 @@
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 
 class Validators {
   static String? phoneValidator(value) {

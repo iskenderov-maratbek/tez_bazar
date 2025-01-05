@@ -43,6 +43,8 @@ class DbFields {
   static String imageKey = 'image';
 
   //Requests paths
+  static String getMainData = 'get_main_data';
+  static String getBanners = 'get_banners';
   static String getCategories = 'get_categories';
   static String getProducts = 'get_products';
   static String authWithGoogle = 'auth_with_google';

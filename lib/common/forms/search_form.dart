@@ -1,10 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_colors.dart';
 import 'package:tez_bazar/providers/providers.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 
 class SearchForm extends ConsumerStatefulWidget {
   final TextEditingController controller;
@@ -25,10 +24,7 @@ class SearchForm extends ConsumerStatefulWidget {
 }
 
 class _TextFieldFormState extends ConsumerState<SearchForm> {
-  Color? fillColor = Colors.grey[300];
-  Color? prefixColor = Colors.black;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
- 
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +51,9 @@ class _TextFieldFormState extends ConsumerState<SearchForm> {
         textInputAction: TextInputAction.search,
         controller: widget.controller,
         maxLength: 320,
-        style: const TextStyle(
-          fontSize: 20,
+        style: TextStyle(
+          fontSize: 18,
+          color: AppColors.white,
         ),
         inputFormatters: widget.inputFormatters,
         // onChanged: _onTextChanged,
@@ -78,17 +75,17 @@ class _TextFieldFormState extends ConsumerState<SearchForm> {
               icon: Icon(
                 Icons.search_rounded,
                 size: 30,
-                color: AppColors.black,
+                color: AppColors.white,
               )),
-          fillColor: fillColor,
+          fillColor: AppColors.black,
           isDense: true,
           hintText: '${TextConstants.search}...',
-          errorStyle: const TextStyle(color: Colors.red, fontSize: 18),
+          errorStyle: const TextStyle(color: Colors.red, fontSize: 16),
           errorMaxLines: 2,
           counterText: '',
-          hintStyle: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
+          hintStyle: TextStyle(
+            color: AppColors.white,
+            fontSize: 18,
             // height: 1.6352,
           ),
         ),

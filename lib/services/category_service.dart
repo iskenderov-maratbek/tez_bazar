@@ -1,31 +1,32 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/common/db_fields.dart';
+import 'package:tez_bazar/constants/db_fields.dart';
 import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/network_data.dart';
 import 'package:tez_bazar/models/categories.dart';
 import 'package:tez_bazar/providers/providers.dart';
+import 'package:tez_bazar/services/request_service.dart';
 
-class CategoryService extends StateNotifier<List<Category>> {
-  CategoryService(this.ref) : super([]);
+class CategoriesService extends StateNotifier<List<Category>> {
   Ref ref;
-  int _offset = 0;
-  final int _limit = 10;
-  bool _loadCompleted = false;
+  final RequestService requestService;
+  CategoriesService(this.ref)
+      : requestService = ref.read(requestServiceProvider),
+        super([]);
 
-  Future<void> fetchCategory() async {
-    if (!_loadCompleted) {
-      Future.delayed(Duration.zero, () {
-        _offset == 0 ? ref.read(loadingProvider.notifier).state = true : null;
-      });
-      try {
-      logServer('Send Post Requests: /${DbFields.getCategories}');
+  setData(List<Category> data) {
+    state = data;
+  }
+
+  Future<void> fetchData() async {
+    return await requestService.sendRequest<void>(
+      () async {
+        logServer('Send Post Requests: /${DbFields.getCategories}');
         final response = await http.get(
           Uri.parse(
             Network.getUrl(
               path: DbFields.getCategories,
-              parameters: 'offset=$_offset&limit=$_limit',
             ),
           ),
         );
@@ -34,27 +35,15 @@ class CategoryService extends StateNotifier<List<Category>> {
           List<dynamic> data = json.decode(response.body);
           if (data.isNotEmpty) {
             categories = data.map((item) => Category.fromJson(item)).toList();
-            state = [...state, ...categories];
-            _offset += _limit;
+            state = categories;
           } else {
-            _loadCompleted = !_loadCompleted;
+            logServer('No data');
+            throw Exception('No data');
           }
-          Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-            ref.read(loadingProvider.notifier).state = false;
-          });
         }
-      } catch (e) {
-        Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-          ref.read(loadingProvider.notifier).state = false;
-        });
-        logError(e);
-      }
-    }
+      },
+    );
   }
 
-  void clear() {
-    state = [];
-    _offset = 0;
-    _loadCompleted = false;
-  }
+  
 }

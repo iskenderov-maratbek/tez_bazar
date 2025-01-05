@@ -1,4 +1,4 @@
-class Ads {
+class UserProducts {
   final int id;
   final String? photo;
   final int categoryId;
@@ -10,7 +10,7 @@ class Ads {
   final bool delivery;
   final String status;
 
-  Ads({
+  UserProducts({
     required this.id,
     required this.name,
     required this.status,
@@ -23,8 +23,8 @@ class Ads {
     required this.delivery,
   });
 
-  factory Ads.fromJson(Map<String, dynamic> json) {
-    return Ads(
+  factory UserProducts.fromJson(Map<String, dynamic> json) {
+    return UserProducts(
       name: json['name'],
       photo: json['photo'],
       price: json['price'],
@@ -37,6 +37,4 @@ class Ads {
       id: json['id'],
     );
   }
-
-  
 }

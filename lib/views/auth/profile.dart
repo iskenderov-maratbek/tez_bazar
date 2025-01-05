@@ -11,7 +11,7 @@ import 'package:tez_bazar/common/validators.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/services/auth_service.dart';
 import 'package:tez_bazar/services/user_service.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 
 class UserProfile extends ConsumerStatefulWidget {
   const UserProfile({super.key});
@@ -94,7 +94,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
     final double sizedBoxesWidth = 5;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (userState == UserResponseState.success) {
-        ref.read(authViewProvider.notifier).state = AuthViewContent.accountPage;
+        ref.read(accountStateProvider.notifier).state = AccountState.account;
         ref.read(userServiceStateProvider.notifier).state =
             UserResponseState.stateDefault;
       }
@@ -185,51 +185,55 @@ class _UserProfileState extends ConsumerState<UserProfile> {
               SizedBox(
                 height: sizedBoxesHeight,
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.white.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: EdgeInsets.all(15),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
-                            'lib/assets/images/icons/kg_flag_small.png',
-                            fit: BoxFit.contain,
-                            width: 30,
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withOpacity(.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              'lib/assets/images/icons/kg_flag_small.png',
+                              fit: BoxFit.contain,
+                              width: 30,
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: sizedBoxesWidth,
-                        ),
-                        textForm(
-                          TextConstants.kgCounterCode,
-                          18,
-                        ),
-                      ],
+                          SizedBox(
+                            width: sizedBoxesWidth,
+                          ),
+                          textForm(
+                            TextConstants.kgCounterCode,
+                            18,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: sizedBoxesWidth,
-                  ),
-                  Expanded(
-                    child: TFForms(
-                      controller: _phoneNumberController,
-                      label: TextConstants.phoneNumberFieldLabel,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(9),
-                      ],
-                      keyboardType: TextInputType.number,
-                      validator: Validators.phoneValidator,
+                    SizedBox(
+                      width: sizedBoxesWidth,
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: TFForms(
+                        controller: _phoneNumberController,
+                        label: TextConstants.phoneNumberFieldLabel,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(9),
+                        ],
+                        keyboardType: TextInputType.number,
+                        validator: Validators.phoneValidator,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               GestureDetector(
                 onTap: () {
@@ -266,97 +270,101 @@ class _UserProfileState extends ConsumerState<UserProfile> {
               SizedBox(
                 height: sizedBoxesHeight,
               ),
-              !whatasappConnect
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.white.withOpacity(.2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding:
-                              EdgeInsets.symmetric(vertical: 6, horizontal: 15),
-                          child: DropdownButton(
-                            padding: EdgeInsets.all(0),
-                            dropdownColor: AppColors.darkGrey,
-                            borderRadius: BorderRadius.circular(12),
-                            underline: Container(),
-                            icon: Icon(
-                              Icons.keyboard_double_arrow_down_rounded,
-                              size: 30,
-                              color: AppColors.primaryColor,
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                child: !whatasappConnect
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withOpacity(.2),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            value: _selectedItem,
-                            items: _items.map((item) {
-                              return DropdownMenuItem<String>(
-                                alignment: Alignment.centerLeft,
-                                value: item['text'],
-                                child: SizedBox(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      item['icon'],
-                                      SizedBox(
-                                        width: 2,
-                                      ),
-                                      textForm(
-                                        item['text'],
-                                        18,
-                                        color: AppColors.white,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
+                            padding: EdgeInsets.symmetric(
+                                vertical: 3, horizontal: 15),
+                            child: DropdownButton(
+                              padding: EdgeInsets.all(0),
+                              dropdownColor: AppColors.backgroundColor,
+                              borderRadius: BorderRadius.circular(12),
+                              underline: Container(),
+                              icon: Icon(
+                                Icons.keyboard_double_arrow_down_rounded,
+                                size: 30,
+                                color: AppColors.primaryColor,
+                              ),
+                              value: _selectedItem,
+                              items: _items.map((item) {
+                                return DropdownMenuItem<String>(
+                                  alignment: Alignment.centerLeft,
+                                  value: item['text'],
+                                  child: SizedBox(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        item['icon'],
+                                        SizedBox(
+                                          width: 2,
+                                        ),
+                                        textForm(
+                                          item['text'],
+                                          18,
+                                          color: AppColors.white,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                _selectedItem = newValue;
-                              });
-                            },
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedItem = newValue;
+                                });
+                              },
+                            ),
+                            //
                           ),
-                          //
-                        ),
-                        SizedBox(
-                          width: sizedBoxesWidth,
-                        ),
-                        Expanded(
-                          child: TFForms(
-                            controller: _whatsappController,
-                            label: TextConstants.whatsappFieldLabel,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(
-                                  _selectedItem == TextConstants.ruCounterCode
-                                      ? 10
-                                      : 9),
-                            ],
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              final ruCountry = RegExp(r'^\d{10}$');
-                              final kgCountry = RegExp(r'^\d{9}$');
-                              if (value == null || value.isEmpty) {
+                          SizedBox(
+                            width: sizedBoxesWidth,
+                          ),
+                          Expanded(
+                            child: TFForms(
+                              controller: _whatsappController,
+                              label: TextConstants.whatsappFieldLabel,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(
+                                    _selectedItem == TextConstants.ruCounterCode
+                                        ? 10
+                                        : 9),
+                              ],
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                final ruCountry = RegExp(r'^\d{10}$');
+                                final kgCountry = RegExp(r'^\d{9}$');
+                                if (value == null || value.isEmpty) {
+                                  return null;
+                                } else if (_selectedItem ==
+                                    TextConstants.ruCounterCode) {
+                                  if (!ruCountry.hasMatch(value)) {
+                                    return TextConstants.invalidNumberIncorrect;
+                                  }
+                                } else if (_selectedItem ==
+                                    TextConstants.kgCounterCode) {
+                                  if (!kgCountry.hasMatch(value)) {
+                                    return TextConstants.invalidNumberIncorrect;
+                                  }
+                                }
                                 return null;
-                              } else if (_selectedItem ==
-                                  TextConstants.ruCounterCode) {
-                                if (!ruCountry.hasMatch(value)) {
-                                  return TextConstants.invalidNumberIncorrect;
-                                }
-                              } else if (_selectedItem ==
-                                  TextConstants.kgCounterCode) {
-                                if (!kgCountry.hasMatch(value)) {
-                                  return TextConstants.invalidNumberIncorrect;
-                                }
-                              }
-                              return null;
-                            },
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    )
-                  : Container(),
+                        ],
+                      )
+                    : Container(),
+              ),
               Visibility(
                 visible: !whatasappConnect,
                 child: SizedBox(

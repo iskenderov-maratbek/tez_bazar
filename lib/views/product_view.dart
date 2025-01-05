@@ -9,6 +9,7 @@ import 'package:tez_bazar/common/widgets/bottom_sheet_sets.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/common/grid_view_sets.dart';
 import 'package:tez_bazar/views/info_view.dart';
+import 'package:tez_bazar/views/page_builder.dart';
 
 class ProductsView extends ConsumerStatefulWidget {
   const ProductsView({super.key});
@@ -35,8 +36,6 @@ class ProductsPageState extends ConsumerState<ProductsView> {
       // Имитация обновления данных
       await Future.delayed(Duration(seconds: ref.read(refreshTimerProvider)));
       setState(() {
-        ref.read(productProvider.notifier).clear();
-        ref.read(productProvider.notifier).getProductFromCategory();
         _isRefreshing = false;
 
         Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
@@ -69,13 +68,11 @@ class ProductsPageState extends ConsumerState<ProductsView> {
       onPopInvokedWithResult: (didPop, result) {
         Navigator.pop(context);
       },
-      child: RefreshIndicator(
-        onRefresh: _refreshAds,
-        displacement: 85,
-        color: AppColors.primaryColor,
-        backgroundColor: AppColors.black,
-        strokeWidth: 3,
-        triggerMode: RefreshIndicatorTriggerMode.onEdge,
+      child: PageBuilder(
+        onRefresh: () async {
+          ref.read(productProvider.notifier).clear();
+          ref.read(productProvider.notifier).getProductFromCategory();
+        },
         child: GridView.builder(
           padding: GridViewSets.padding(),
           controller: _scrollController,
@@ -86,7 +83,6 @@ class ProductsPageState extends ConsumerState<ProductsView> {
               onPressed: () {
                 showModalBottomSheet(
                   enableDrag: BottomSheetSets.enableDrag,
-                  // scrollControlDisabledMaxHeightRatio: 4,
                   backgroundColor: BottomSheetSets.backgroundColor,
                   context: context,
                   isScrollControlled: BottomSheetSets.fullScreenView,
@@ -127,7 +123,7 @@ class ProductsPageState extends ConsumerState<ProductsView> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: GridViewSets.itemImageBorderRadius(),
-                        color: AppColors.darkGrey,
+                        color: AppColors.backgroundColor,
                       ),
                       child: Stack(
                         children: [

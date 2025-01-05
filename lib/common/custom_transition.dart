@@ -42,10 +42,10 @@ class CustomRoute extends MaterialPageRoute {
   late Duration duration;
   Duration reverseduration = const Duration(milliseconds: 500);
   CustomRoute({
-    required WidgetBuilder builder,
-    bool maintainState = false,
+    required super.builder,
+    super.maintainState = false,
     this.duration = const Duration(milliseconds: 500),
-  }) : super(builder: builder, maintainState: maintainState);
+  });
 
   @override
   Duration get transitionDuration => duration;

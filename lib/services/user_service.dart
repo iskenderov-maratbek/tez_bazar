@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/common/db_fields.dart';
+import 'package:tez_bazar/constants/db_fields.dart';
 import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/network_data.dart';
 import 'package:tez_bazar/models/user.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/services/auth_service.dart';
+import 'package:tez_bazar/services/request_service.dart';
 import 'package:tez_bazar/services/shared_prefs_service.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
 
 final userServiceProvider = StateNotifierProvider<UserService, User?>((ref) {
   return UserService(ref);
@@ -18,7 +17,10 @@ final userServiceProvider = StateNotifierProvider<UserService, User?>((ref) {
 
 class UserService extends StateNotifier<User?> {
   final Ref ref;
-  UserService(this.ref) : super(null);
+  final RequestService requestService;
+  UserService(this.ref)
+      : requestService = ref.read(requestServiceProvider),
+        super(null);
 
   Future<void> addAd({
     File? image,
@@ -29,81 +31,68 @@ class UserService extends StateNotifier<User?> {
     required String location,
     required bool delivery,
     required int categoryId,
-  }) async {
-    ref.read(loadingProvider.notifier).state = true;
-    try {
-      final token = ref.read(spServiceProvider).loadTokenSP();
-      final userId = ref.read(authServiceProvider)?.id;
+  }) async =>
+      await requestService.sendRequest<void>(() async {
+        final token = ref.read(spServiceProvider).loadTokenSP();
+        final userId = ref.read(authServiceProvider)?.id;
 
-      final jsonData = {
-        DbFields.productNAME: name,
-        DbFields.productDESCRIPTION: description,
-        DbFields.productPRICE: price,
-        DbFields.productPRICETYPE: priceType,
-        DbFields.productLOCATION: location,
-        DbFields.productDELIVERY: delivery,
-        DbFields.productCATEGORYID: categoryId,
-        DbFields.productUSERID: userId,
-      };
-      if (image != null) {
-        final request = http.MultipartRequest(
-          'POST',
-          Uri.parse(
-            Network.getUrl(
-              path: DbFields.addAdWithFile,
+        final jsonData = {
+          DbFields.productNAME: name,
+          DbFields.productDESCRIPTION: description,
+          DbFields.productPRICE: price,
+          DbFields.productPRICETYPE: priceType,
+          DbFields.productLOCATION: location,
+          DbFields.productDELIVERY: delivery,
+          DbFields.productCATEGORYID: categoryId,
+          DbFields.productUSERID: userId,
+        };
+        if (image != null) {
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse(
+              Network.getUrl(
+                path: DbFields.addAdWithFile,
+              ),
             ),
-          ),
-        );
-        request.files.add(
-            await http.MultipartFile.fromPath(DbFields.imageKey, image.path));
-        request.fields[DbFields.jsonDataKey] = jsonEncode(jsonData);
-        request.headers[DbFields.authKey] = '${DbFields.secretStart} $token';
-        request.headers[DbFields.userID] = userId!;
-        request.headers[DbFields.contentTypeKey] = DbFields.multipartFormData;
-        final response = await request.send();
-        if (response.statusCode == 200) {
-        } else {
-          ref.read(errorDialogMessageProvider.notifier).state =
-              'Что-то пошло не так!';
-          ref.read(errorDialogProvider.notifier).state = true;
-          ref.read(loadingProvider.notifier).state = false;
+          );
+          request.files.add(
+              await http.MultipartFile.fromPath(DbFields.imageKey, image.path));
+          request.fields[DbFields.jsonDataKey] = jsonEncode(jsonData);
+          request.headers[DbFields.authKey] = '${DbFields.secretStart} $token';
+          request.headers[DbFields.userID] = userId!;
+          request.headers[DbFields.contentTypeKey] = DbFields.multipartFormData;
+          final response = await request.send();
+          if (response.statusCode == 200) {
+          } else {
+            ref.read(errorDialogMessageProvider.notifier).state =
+                'Что-то пошло не так!';
+            ref.read(errorDialogProvider.notifier).state = true;
+            ref.read(loadingProvider.notifier).state = false;
 
-          return;
-        }
-      } else {
-        jsonData[DbFields.productPHOTO] = 'null';
-        final response = await http.post(
-            Uri.parse(Network.getUrl(path: DbFields.addAd)),
-            body: jsonEncode(jsonData),
-            headers: {
-              DbFields.contentTypeKey: DbFields.applicationJson,
-              DbFields.authKey: '${DbFields.secretStart} $token',
-              DbFields.userID: userId!,
-            });
-        if (response.statusCode == 200) {
+            return;
+          }
         } else {
-          ref.read(errorDialogMessageProvider.notifier).state =
-              'Что-то пошло не так!';
-          ref.read(errorDialogProvider.notifier).state = true;
-          ref.read(loadingProvider.notifier).state = false;
-          return;
+          jsonData[DbFields.productPHOTO] = 'null';
+          final response = await http.post(
+              Uri.parse(Network.getUrl(path: DbFields.addAd)),
+              body: jsonEncode(jsonData),
+              headers: {
+                DbFields.contentTypeKey: DbFields.applicationJson,
+                DbFields.authKey: '${DbFields.secretStart} $token',
+                DbFields.userID: userId!,
+              });
+          if (response.statusCode == 200) {
+          } else {
+            ref.read(errorDialogMessageProvider.notifier).state =
+                'Что-то пошло не так!';
+            ref.read(errorDialogProvider.notifier).state = true;
+            ref.read(loadingProvider.notifier).state = false;
+            return;
+          }
         }
-      }
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
       });
-    } catch (e) {
-      ref.read(errorDialogMessageProvider.notifier).state =
-          'Что-то пошло не так!';
-      ref.read(errorDialogProvider.notifier).state = true;
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
-      });
-      logError(e);
-    }
-  }
 
-  editAd({
+  editProduct({
     File? image,
     required int id,
     required String name,
@@ -113,184 +102,141 @@ class UserService extends StateNotifier<User?> {
     required String priceType,
     required String location,
     required bool delivery,
-  }) async {
-    ref.read(loadingProvider.notifier).state = true;
-    try {
-      final token = ref.read(spServiceProvider).loadTokenSP();
-      final userId = ref.read(authServiceProvider)?.id;
-      final jsonData = {
-        DbFields.productID: id,
-        DbFields.productNAME: name,
-        DbFields.productCATEGORYID: categoryId,
-        DbFields.productDESCRIPTION: description,
-        DbFields.productPRICE: price,
-        DbFields.productPRICETYPE: priceType,
-        DbFields.productDELIVERY: delivery,
-        DbFields.productLOCATION: location,
-      };
+  }) async =>
+      await requestService.sendRequest<void>(() async {
+        final token = ref.read(spServiceProvider).loadTokenSP();
+        final userId = ref.read(authServiceProvider)?.id;
+        final jsonData = {
+          DbFields.productID: id,
+          DbFields.productNAME: name,
+          DbFields.productCATEGORYID: categoryId,
+          DbFields.productDESCRIPTION: description,
+          DbFields.productPRICE: price,
+          DbFields.productPRICETYPE: priceType,
+          DbFields.productDELIVERY: delivery,
+          DbFields.productLOCATION: location,
+        };
 
-      if (image != null) {
-        final request = http.MultipartRequest(
-          'POST',
-          Uri.parse(
-            Network.getUrl(
-              path: DbFields.editAdWithFile,
+        if (image != null) {
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse(
+              Network.getUrl(
+                path: DbFields.editAdWithFile,
+              ),
             ),
-          ),
-        );
-        request.files.add(
-            await http.MultipartFile.fromPath(DbFields.imageKey, image.path));
-        request.fields[DbFields.jsonDataKey] = jsonEncode(jsonData);
-        request.headers[DbFields.authKey] = '${DbFields.secretStart} $token';
-        request.headers[DbFields.userID] = userId!;
-        request.headers[DbFields.productIDAUTH] = id.toString();
-        request.headers[DbFields.contentTypeKey] = DbFields.multipartFormData;
-        final response = await request.send();
-        if (response.statusCode == 200) {
+          );
+          request.files.add(
+              await http.MultipartFile.fromPath(DbFields.imageKey, image.path));
+          request.fields[DbFields.jsonDataKey] = jsonEncode(jsonData);
+          request.headers[DbFields.authKey] = '${DbFields.secretStart} $token';
+          request.headers[DbFields.userID] = userId!;
+          request.headers[DbFields.productIDAUTH] = id.toString();
+          request.headers[DbFields.contentTypeKey] = DbFields.multipartFormData;
+          final response = await request.send();
+          if (response.statusCode == 200) {
+          } else {
+            logError(response.stream.bytesToString());
+          }
         } else {
-          logError(response.stream.bytesToString());
+          jsonData[DbFields.productPHOTO] = 'null';
+          final response = await http.post(
+            Uri.parse(
+              Network.getUrl(
+                path: DbFields.editAd,
+              ),
+            ),
+            body: jsonEncode(jsonData),
+            headers: {
+              DbFields.contentTypeKey: DbFields.applicationJson,
+              DbFields.authKey: '${DbFields.secretStart} $token',
+              DbFields.userID: userId!,
+              DbFields.productIDAUTH: id.toString(),
+            },
+          );
+          if (response.statusCode == 200) {
+          } else {
+            ref.read(errorDialogMessageProvider.notifier).state =
+                'Что-то пошло не так!';
+            ref.read(errorDialogProvider.notifier).state = true;
+          }
         }
-      } else {
-        jsonData[DbFields.productPHOTO] = 'null';
+      });
+
+  removeProduct(
+    int productId,
+  ) async =>
+      await requestService.sendRequest<void>(() async {
+        final token = ref.read(spServiceProvider).loadTokenSP();
+        final userId = ref.read(authServiceProvider)?.id;
         final response = await http.post(
-          Uri.parse(
-            Network.getUrl(
-              path: DbFields.editAd,
+            Uri.parse(
+              Network.getUrl(
+                path: DbFields.removeAd,
+              ),
             ),
-          ),
-          body: jsonEncode(jsonData),
-          headers: {
-            DbFields.contentTypeKey: DbFields.applicationJson,
-            DbFields.authKey: '${DbFields.secretStart} $token',
-            DbFields.userID: userId!,
-            DbFields.productIDAUTH: id.toString(),
-          },
-        );
+            headers: {
+              DbFields.contentTypeKey: DbFields.applicationJson,
+              DbFields.authKey: '${DbFields.secretStart} ${token!}',
+              DbFields.productUSERID: userId!,
+              DbFields.productID: productId.toString(),
+            });
         if (response.statusCode == 200) {
+          logInfo(response.body);
         } else {
-          ref.read(errorDialogMessageProvider.notifier).state =
-              'Что-то пошло не так!';
-          ref.read(errorDialogProvider.notifier).state = true;
+          logError(response.body);
         }
-      }
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
       });
-    } catch (e) {
-      ref.read(errorDialogMessageProvider.notifier).state =
-          'Что-то пошло не так!';
-      ref.read(errorDialogProvider.notifier).state = true;
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
-      });
-    }
-  }
 
-  removeAd(
+  moderateProduct(
     int productId,
-  ) async {
-    ref.read(loadingProvider.notifier).state = true;
-    try {
-      final token = ref.read(spServiceProvider).loadTokenSP();
-      final userId = ref.read(authServiceProvider)?.id;
-      final response = await http.post(
-          Uri.parse(
-            Network.getUrl(
-              path: DbFields.removeAd,
+  ) async =>
+      await requestService.sendRequest<void>(() async {
+        final token = ref.read(spServiceProvider).loadTokenSP();
+        final userId = ref.read(authServiceProvider)?.id;
+        final response = await http.post(
+            Uri.parse(
+              Network.getUrl(
+                path: DbFields.moderateAd,
+              ),
             ),
-          ),
-          headers: {
-            DbFields.contentTypeKey: DbFields.applicationJson,
-            DbFields.authKey: '${DbFields.secretStart} ${token!}',
-            DbFields.productUSERID: userId!,
-            DbFields.productID: productId.toString(),
-          });
-      if (response.statusCode == 200) {
-        logInfo(response.body);
-      } else {
-        logError(response.body);
-      }
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
+            headers: {
+              DbFields.contentTypeKey: DbFields.applicationJson,
+              DbFields.authKey: '${DbFields.secretStart} ${token!}',
+              DbFields.productUSERID: userId!,
+              DbFields.productID: productId.toString(),
+            });
+        if (response.statusCode == 200) {
+          logInfo(response.body);
+        } else {
+          logError(response.body);
+        }
       });
-    } catch (e) {
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
-      });
-      logError(e);
-    }
-  }
 
-  moderateAd(
+  archiveProduct(
     int productId,
-  ) async {
-    ref.read(loadingProvider.notifier).state = true;
-    try {
-      final token = ref.read(spServiceProvider).loadTokenSP();
-      final userId = ref.read(authServiceProvider)?.id;
-      final response = await http.post(
-          Uri.parse(
-            Network.getUrl(
-              path: DbFields.moderateAd,
+  ) async =>
+      await requestService.sendRequest<void>(() async {
+        final token = ref.read(spServiceProvider).loadTokenSP();
+        final userId = ref.read(authServiceProvider)?.id;
+        final response = await http.post(
+            Uri.parse(
+              Network.getUrl(
+                path: DbFields.archivedAd,
+              ),
             ),
-          ),
-          headers: {
-            DbFields.contentTypeKey: DbFields.applicationJson,
-            DbFields.authKey: '${DbFields.secretStart} ${token!}',
-            DbFields.productUSERID: userId!,
-            DbFields.productID: productId.toString(),
-          });
-      if (response.statusCode == 200) {
-        logInfo(response.body);
-      } else {
-        logError(response.body);
-      }
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
+            headers: {
+              DbFields.contentTypeKey: DbFields.applicationJson,
+              DbFields.authKey: '${DbFields.secretStart} ${token!}',
+              DbFields.productUSERID: userId!,
+              DbFields.productID: productId.toString(),
+            });
+        if (response.statusCode == 200) {
+          logInfo(response.body);
+        } else {
+          logError(response.body);
+        }
       });
-    } catch (e) {
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
-      });
-
-      logError(e);
-    }
-  }
-
-  archiveAd(
-    int productId,
-  ) async {
-    ref.read(loadingProvider.notifier).state = true;
-    try {
-      final token = ref.read(spServiceProvider).loadTokenSP();
-      final userId = ref.read(authServiceProvider)?.id;
-      final response = await http.post(
-          Uri.parse(
-            Network.getUrl(
-              path: DbFields.archivedAd,
-            ),
-          ),
-          headers: {
-            DbFields.contentTypeKey: DbFields.applicationJson,
-            DbFields.authKey: '${DbFields.secretStart} ${token!}',
-            DbFields.productUSERID: userId!,
-            DbFields.productID: productId.toString(),
-          });
-      if (response.statusCode == 200) {
-        logInfo(response.body);
-      } else {
-        logError(response.body);
-      }
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
-      });
-    } catch (e) {
-      Future.delayed(Duration(seconds: ref.read(loadTimer)), () {
-        ref.read(loadingProvider.notifier).state = false;
-      });
-      logError(e);
-    }
-  }
 
   Future<void> userdataUpdate({
     required File? image,
@@ -299,71 +245,63 @@ class UserService extends StateNotifier<User?> {
     required String whatsapp,
     required String location,
     required String id,
-  }) async {
-    ref.read(loadingProvider.notifier).state = true;
-    try {
-      final token = ref.read(spServiceProvider).loadTokenSP();
-      final id = ref.read(authServiceProvider)?.id;
-      final Map<String, dynamic> jsonData = {
-        DbFields.userNAME: name,
-        DbFields.userPHONE: number,
-        DbFields.userWHATSAPP: whatsapp,
-        DbFields.userLOCATION: location,
-        DbFields.userID: id,
-      };
-      if (image != null) {
-        final request = http.MultipartRequest(
-          'POST',
-          Uri.parse(
-            Network.getUrl(
-              path: DbFields.userProfileUpdateWithFile,
+  }) async =>
+      await requestService.sendRequest<void>(() async {
+        final token = ref.read(spServiceProvider).loadTokenSP();
+        final id = ref.read(authServiceProvider)?.id;
+        final Map<String, dynamic> jsonData = {
+          DbFields.userNAME: name,
+          DbFields.userPHONE: number,
+          DbFields.userWHATSAPP: whatsapp,
+          DbFields.userLOCATION: location,
+          DbFields.userID: id,
+        };
+        if (image != null) {
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse(
+              Network.getUrl(
+                path: DbFields.userProfileUpdateWithFile,
+              ),
             ),
-          ),
-        );
-        request.files.add(
-            await http.MultipartFile.fromPath(DbFields.imageKey, image.path));
-        request.fields[DbFields.jsonDataKey] = jsonEncode(jsonData);
-        request.headers[DbFields.authKey] = '${DbFields.secretStart} $token';
-        request.headers[DbFields.userID] = id!;
-        request.headers[DbFields.contentTypeKey] = DbFields.multipartFormData;
+          );
+          request.files.add(
+              await http.MultipartFile.fromPath(DbFields.imageKey, image.path));
+          request.fields[DbFields.jsonDataKey] = jsonEncode(jsonData);
+          request.headers[DbFields.authKey] = '${DbFields.secretStart} $token';
+          request.headers[DbFields.userID] = id!;
+          request.headers[DbFields.contentTypeKey] = DbFields.multipartFormData;
 
-        final response = await request.send();
-        if (response.statusCode == 200) {
-          logServer('Response: OK');
-          ref.read(authServiceProvider.notifier).signOut();
-          ref.read(authServiceProvider.notifier).signInWithGoogle();
+          final response = await request.send();
+          if (response.statusCode == 200) {
+            logServer('Response: OK');
+            ref.read(authServiceProvider.notifier).signOut();
+            ref.read(authServiceProvider.notifier).signInWithGoogle();
+          } else {
+            logServer(
+                '${response.statusCode}: ${response.stream.bytesToString()}');
+            ref.read(errorDialogMessageProvider.notifier).state =
+                'Что-то пошло не так!';
+            ref.read(errorDialogProvider.notifier).state = true;
+          }
         } else {
-          logServer(
-              '${response.statusCode}: ${response.stream.bytesToString()}');
-          ref.read(errorDialogMessageProvider.notifier).state =
-              'Что-то пошло не так!';
-          ref.read(errorDialogProvider.notifier).state = true;
+          jsonData[DbFields.userPROFILEPHOTO] = 'null';
+          final response = await http.post(
+              Uri.parse(Network.getUrl(path: DbFields.userProfileUpdate)),
+              body: jsonEncode(jsonData),
+              headers: {
+                DbFields.contentTypeKey: DbFields.applicationJson,
+                DbFields.authKey: '${DbFields.secretStart} $token',
+                DbFields.userID: id!,
+              });
+          if (response.statusCode == 200) {
+            ref.read(authServiceProvider.notifier).signOut();
+            ref.read(authServiceProvider.notifier).signInWithGoogle();
+          } else {
+            ref.read(errorDialogMessageProvider.notifier).state =
+                'Что-то пошло не так!';
+            ref.read(errorDialogProvider.notifier).state = true;
+          }
         }
-      } else {
-        jsonData[DbFields.userPROFILEPHOTO] = 'null';
-        final response = await http.post(
-            Uri.parse(Network.getUrl(path: DbFields.userProfileUpdate)),
-            body: jsonEncode(jsonData),
-            headers: {
-              DbFields.contentTypeKey: DbFields.applicationJson,
-              DbFields.authKey: '${DbFields.secretStart} $token',
-              DbFields.userID: id!,
-            });
-        if (response.statusCode == 200) {
-          ref.read(authServiceProvider.notifier).signOut();
-          ref.read(authServiceProvider.notifier).signInWithGoogle();
-        } else {
-          ref.read(errorDialogMessageProvider.notifier).state =
-              'Что-то пошло не так!';
-          ref.read(errorDialogProvider.notifier).state = true;
-        }
-      }
-    } catch (e) {
-      logError('Image upload failed with: $e');
-      ref.read(loadingProvider.notifier).state = false;
-      ref.read(errorDialogMessageProvider.notifier).state =
-          'Что-то пошло не так!';
-      ref.read(errorDialogProvider.notifier).state = true;
-    }
-  }
+      });
 }

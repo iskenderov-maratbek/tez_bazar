@@ -116,7 +116,7 @@ class DialogForms {
       );
 
   static userLoadingDialog(context, loadingText) => userDialogForm(
-        loadingCircle(),
+        LoadingAnimation(size: 100),
         textForm(loadingText, 18),
       );
 

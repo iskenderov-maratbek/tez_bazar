@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tez_bazar/common/app_colors.dart';
 import 'package:tez_bazar/common/forms/text_forms.dart';
-import 'package:tez_bazar/texts/text_constants.dart';
+import 'package:tez_bazar/constants/text_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class InfoView extends StatelessWidget {

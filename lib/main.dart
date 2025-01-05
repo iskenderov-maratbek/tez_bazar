@@ -2,12 +2,8 @@ import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tez_bazar/common/app_theme.dart';
-import 'package:tez_bazar/common/custom_transition.dart';
 import 'package:tez_bazar/common/logging.dart';
-import 'package:tez_bazar/views/auth/account_view.dart';
-import 'package:tez_bazar/views/home/home_view.dart';
-import 'package:tez_bazar/views/main_view.dart';
-import 'package:tez_bazar/views/user_ads/ads_view.dart';
+import 'package:tez_bazar/views/main/main_view.dart';
 
 Future<void> main() async {
   ansiColorDisabled = false;
@@ -20,26 +16,16 @@ Future<void> main() async {
   );
 }
 
-class TezBazar extends StatelessWidget {
+class TezBazar extends ConsumerWidget {
   const TezBazar({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    Map<String, Widget> onGenerateRoute = {
-      '/': const MainView(),
-      '/account': const AccountView(),
-      '/ads': const AdsView(),
-    };
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      onGenerateRoute: (settings) {
-        return CustomRoute(
-          builder: (context) => onGenerateRoute[settings.name]!,
-        );
-      },
       debugShowCheckedModeBanner: false,
       title: 'TezBazar',
       theme: themeData(context),
-      initialRoute: '/',
+      home: const MainView(),
     );
   }
 }
