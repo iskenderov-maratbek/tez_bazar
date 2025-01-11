@@ -2,13 +2,13 @@ import 'package:flutter/material.dart'
     show
         BorderRadius,
         BoxDecoration,
+        Center,
         Column,
         Container,
         CrossAxisAlignment,
         EdgeInsets,
         FontWeight,
         Icon,
-        MainAxisAlignment,
         MainAxisSize,
         Row,
         SizedBox,
@@ -36,6 +36,7 @@ setPopupButton({icon, color, text}) => Row(
     );
 
 buildConfirmCard(adName, adPrice) {
+  final double priceFontSize = 18;
   return Container(
     decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
@@ -46,21 +47,8 @@ buildConfirmCard(adName, adPrice) {
       children: [
         textForm(adName, 20,
             textAlign: TextAlign.center, weight: FontWeight.bold),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            textForm(
-              '$adPrice',
-              18,
-              textAlign: TextAlign.center,
-            ),
-            setCurrency(8),
-            SizedBox(
-              width: 2,
-            ),
-          ],
+        Center(
+          child: setPrice(adPrice, priceFontSize),
         ),
       ],
     ),

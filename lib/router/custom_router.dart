@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/router/route_account.dart';
 import 'package:tez_bazar/views/auth/account_view.dart';
 import 'package:tez_bazar/views/auth/profile.dart';
 import 'package:tez_bazar/views/home/home_view.dart';
 import 'package:tez_bazar/providers/providers.dart';
-import 'package:tez_bazar/views/product_view.dart';
+import 'package:tez_bazar/views/home/routes/products/products_view.dart';
 import 'package:tez_bazar/views/search_view.dart';
 import 'package:tez_bazar/views/user_products/user_products_view.dart';
 
@@ -42,7 +41,7 @@ class BodySwitcherState extends ConsumerState<CustomRouter> {
             HomeState.category => ProductsView(),
             HomeState.search => SearchView(),
           },
-        BottomSelectedMenu.userProducts => AdsView(),
+        BottomSelectedMenu.userProducts => UserProductsView(),
         BottomSelectedMenu.account => switch (accountState) {
             AccountState.account => AccountView(),
             AccountState.profile => UserProfile(),

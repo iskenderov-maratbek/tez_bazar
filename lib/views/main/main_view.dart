@@ -1,16 +1,15 @@
-import 'dart:async';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tez_bazar/common/forms/loading.dart';
 import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/router/custom_router.dart';
 import 'package:tez_bazar/services/refresh_service.dart';
-import 'package:tez_bazar/views/home/bottom_bar.dart';
-import 'package:tez_bazar/views/main/app_bar.dart';
+import 'package:tez_bazar/views/main/widgets/bottom_bar.dart';
+import 'package:tez_bazar/views/main/widgets/app_bar.dart';
 import 'package:tez_bazar/common/app_colors.dart';
+import 'package:tez_bazar/views/main/utils/error_overlay.dart';
+import 'package:tez_bazar/views/main/utils/pop_system.dart';
+import 'package:tez_bazar/views/main/widgets/loading_full_screen.dart';
 
 class MainView extends ConsumerStatefulWidget {
   const MainView({super.key});
@@ -21,92 +20,41 @@ class MainView extends ConsumerStatefulWidget {
 class _MainViewState extends ConsumerState<MainView> {
   @override
   void initState() {
-    ref.read(mainServiceProvider).getMainData();
+    ref.read(versionProvider.notifier).checkHomeVersion();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final route = ref.watch(routeProvider);
     logView(runtimeType);
+
+    final route = ref.watch(routeProvider);
+    final appBar =
+        route == BottomSelectedMenu.home ? const CustomAppBar() : null;
+    final errorDialog = ref.watch(errorDialogProvider);
+    final dialogText = ref.watch(errorDialogMessageProvider);
+
+    errorDialog
+        ? showOverlay(context: context, ref: ref, dialogText: dialogText ?? '')
+        : null;
+
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        logInfo('Popped: $didPop, Result: $result');
-        _popSystem(route);
-      },
+      onPopInvokedWithResult: (didPop, result) async => popSystem(ref, route),
       child: Stack(
         children: [
           Scaffold(
-            appBar:
-                route == BottomSelectedMenu.home ? const CustomAppBar() : null,
+            appBar: appBar,
             backgroundColor: AppColors.black,
             body: CustomRouter(),
             bottomNavigationBar: const CustomBottomBar(),
           ),
-          loadingIndicator(),
+          Consumer(builder: (context, ref, child) {
+            final isRefreshing = ref.watch(refreshServiceProvider);
+            return isRefreshing ? LoadingFullScreen() : Container();
+          })
         ],
       ),
     );
-  }
-
-  Consumer loadingIndicator() {
-    return Consumer(
-      builder: (context, ref, child) {
-        final isRefreshing = ref.watch(refreshServiceProvider);
-        return isRefreshing
-            ? BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                child: AlertDialog(
-                  contentPadding: const EdgeInsets.all(0),
-                  insetPadding: const EdgeInsets.all(0),
-                  backgroundColor: AppColors.transparent,
-                  shadowColor: AppColors.transparent,
-                  surfaceTintColor: AppColors.transparent,
-                  content: Container(
-                    width: double.maxFinite,
-                    color: AppColors.black.withOpacity(.3),
-                    child: LoadingAnimation(
-                      size: 100,
-                    ),
-                  ),
-                ),
-              )
-            : Container();
-      },
-    );
-  }
-
-  void _popSystem(BottomSelectedMenu router) {
-    final accountState = ref.watch(accountStateProvider);
-    final homeState = ref.watch(homeStateProvider);
-    switch (router) {
-      case BottomSelectedMenu.home:
-        switch (homeState) {
-          case HomeState.home:
-            break;
-          case HomeState.category:
-            ref.read(homeStateProvider.notifier).state = HomeState.home;
-            break;
-          case HomeState.search:
-            ref.read(homeStateProvider.notifier).state = HomeState.home;
-            break;
-        }
-        break;
-      case BottomSelectedMenu.userProducts:
-        ref.read(routeProvider.notifier).state = BottomSelectedMenu.home;
-        break;
-      case BottomSelectedMenu.account:
-        switch (accountState) {
-          case AccountState.account:
-            ref.read(routeProvider.notifier).state = BottomSelectedMenu.home;
-            break;
-          case AccountState.profile:
-            ref.read(accountStateProvider.notifier).state =
-                AccountState.account;
-            break;
-        }
-        break;
-    }
   }
 }

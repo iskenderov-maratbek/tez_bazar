@@ -23,15 +23,41 @@ boxShadow({offset}) {
   ];
 }
 
-Image networkImg(
-        {required String src,
-        required double width,
-        double? height,
-        double? size}) =>
-    Image.network(src, fit: BoxFit.cover, width: width, height: height ?? width,
+networkImg(
+    {required String src,
+    required double width,
+    double? height,
+    double? size}) {
+  if (src.contains('http')) {
+    return Image.network(src,
+        fit: BoxFit.cover, width: width, height: height ?? width,
         loadingBuilder: (context, child, loadingProgress) {
       if (loadingProgress == null) return child;
       return Center(
         child: LoadingAnimation(size: size ?? width),
       );
     });
+  } else {
+    return Image.asset(
+      src,
+      fit: BoxFit.cover,
+      width: width,
+      height: height ?? width,
+    );
+  }
+}
+
+shadowAppBar({child, bgColor = AppColors.black}) => Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: bgColor,
+            offset: Offset(0, 0),
+            spreadRadius: 3,
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: child,
+    );

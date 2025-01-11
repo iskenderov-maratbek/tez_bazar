@@ -9,11 +9,15 @@ Future<void> main() async {
   ansiColorDisabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   logSys('Running the app');
-  runApp(
-    const ProviderScope(
-      child: TezBazar(),
-    ),
-  );
+  try {
+    runApp(
+      const ProviderScope(
+        child: TezBazar(),
+      ),
+    );
+  } catch (e) {
+    logError(e);
+  }
 }
 
 class TezBazar extends ConsumerWidget {

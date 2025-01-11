@@ -3,7 +3,8 @@ import 'package:tez_bazar/common/app_colors.dart';
 import 'package:tez_bazar/constants/text_constants.dart';
 import 'package:tez_bazar/views/user_products/popUpMenu/popUpMenu.dart';
 
-popUpActiveList(productId, name, price, toArchive, toDelete) =>
+popUpActiveList(
+        productId, name, price, Function() toArchive, Function() toDelete) =>
     PopupMenuButton<int>(
       color: AppColors.black,
       padding: EdgeInsets.symmetric(horizontal: 20),

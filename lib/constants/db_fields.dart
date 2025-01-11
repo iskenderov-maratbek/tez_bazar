@@ -35,28 +35,32 @@ class DbFields {
   static String contentTypeKey = 'Content-Type';
   static String applicationJson = 'application/json';
   static String multipartFormData = 'multipart/form-data';
-
-  static String allcategories = 'all_categories';
+  static String homeVersionKey = 'home_version';
+  static String userProductVersionKey = 'user_product_version';
 
 //Request paths
   static String jsonDataKey = 'json_data';
   static String imageKey = 'image';
 
   //Requests paths
-  static String getMainData = 'get_main_data';
-  static String getBanners = 'get_banners';
-  static String getCategories = 'get_categories';
-  static String getProducts = 'get_products';
-  static String authWithGoogle = 'auth_with_google';
-  static String getAds = 'get_ads';
-  static String search = 'search';
-  static String userProfileUpdate = 'user_profile_update';
-  static String userProfileUpdateWithFile = 'user_profile_update_with_file';
-  static String addAd = 'add_ad';
-  static String addAdWithFile = 'add_ad_with_file';
-  static String editAd = 'edit_ad';
-  static String editAdWithFile = 'edit_ad_with_file';
-  static String archivedAd = 'archived_ad';
-  static String moderateAd = 'moderate_ad';
-  static String removeAd = 'remove_ad';
+  static String allcategories = '/all_categories';
+  static String getMainData = '/get_main_data';
+  static String getBanners = '/get_banners';
+  static String getCategories = '/get_categories';
+  static String getProducts = '/get_products';
+  static String authWithGoogle = '/auth_with_google';
+  static String getActiveProducts = '/get_active_products';
+  static String getArchiveProducts = '/get_archive_products';
+  static String search = '/search';
+  static String userProfileUpdate = '/user_profile_update';
+  static String userProfileUpdateWithFile = '/user_profile_update_with_file';
+  static String addAd = '/add_ad';
+  static String addAdWithFile = '/add_ad_with_file';
+  static String editAd = '/edit_ad';
+  static String editAdWithFile = '/edit_ad_with_file';
+  static String archivedAd = '/archived_ad';
+  static String moderateAd = '/moderate_ad';
+  static String removeAd = '/remove_ad';
+  static String getHomeVersion = '/get_home_version';
+  static String getUserProductVersion = '/get_user_product_version';
 }

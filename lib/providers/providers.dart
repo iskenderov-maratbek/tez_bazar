@@ -1,20 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tez_bazar/models/archive_products.dart';
 import 'package:tez_bazar/models/banners.dart';
 import 'package:tez_bazar/models/user_products.dart';
 
 import 'package:tez_bazar/models/categories.dart';
 import 'package:tez_bazar/models/products.dart';
 import 'package:tez_bazar/models/search_history.dart';
-import 'package:tez_bazar/services/banners_service.dart';
-import 'package:tez_bazar/services/main_page_service.dart';
-import 'package:tez_bazar/services/user_product_service.dart';
-import 'package:tez_bazar/services/category_service.dart';
+import 'package:tez_bazar/products_services/archive_products_service.dart';
+import 'package:tez_bazar/products_services/banners_service.dart';
+import 'package:tez_bazar/products_services/main_page_service.dart';
+import 'package:tez_bazar/products_services/active_product_service.dart';
+import 'package:tez_bazar/products_services/category_service.dart';
 import 'package:tez_bazar/services/image_service.dart';
-import 'package:tez_bazar/services/product_service.dart';
+import 'package:tez_bazar/products_services/product_service.dart';
 import 'package:tez_bazar/services/request_service.dart';
-import 'package:tez_bazar/services/search_service.dart';
+import 'package:tez_bazar/products_services/search_service.dart';
 import 'package:tez_bazar/constants/text_constants.dart';
+import 'package:tez_bazar/services/version_service.dart';
 
 final requestServiceProvider = Provider<RequestService>((ref) {
   return RequestService(ref);
@@ -34,9 +37,9 @@ final bannersProvider =
   return BannersService(ref);
 });
 
-final userProductProvider =
-    StateNotifierProvider<UserProductService, List<UserProducts>>((ref) {
-  return UserProductService(ref);
+final activeProductProvider =
+    StateNotifierProvider<ActiveProductService, List<ActiveProducts>>((ref) {
+  return ActiveProductService(ref);
 });
 
 final productProvider =
@@ -47,6 +50,11 @@ final productProvider =
 final searchProvider =
     StateNotifierProvider<ProductSearchService, List<SearchHistory>>((ref) {
   return ProductSearchService(ref);
+});
+
+final archiveProductsProvider =
+    StateNotifierProvider<ArchiveProductsService, List<ArchiveProducts>>((ref) {
+  return ArchiveProductsService(ref);
 });
 
 // Провайдер для состояния авторизации
@@ -112,3 +120,7 @@ final accountStateProvider =
 enum HomeState { home, category, search }
 
 final homeStateProvider = StateProvider<HomeState>((ref) => HomeState.home);
+
+final versionProvider = StateNotifierProvider<VersionService, String?>((ref) {
+  return VersionService(ref);
+});

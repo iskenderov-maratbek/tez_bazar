@@ -40,8 +40,28 @@ String setPhoneFormat(String phoneNumber) {
   }
 }
 
-setCurrency(double width) => Image.asset(
-      'lib/assets/images/icons/currency_yellow.png',
-      fit: BoxFit.contain,
-      width: width,
+setPrice(int price, double priceFontSize, {double? position}) => Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        textForm('$price', priceFontSize),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: position ?? 4, horizontal: 2),
+          child: Image.asset(
+            'lib/assets/images/icons/currency_yellow.png',
+            fit: BoxFit.contain,
+            width: priceFontSize * .4,
+          ),
+        ),
+      ],
+    );
+
+setCurrency(double priceFontSize) => Padding(
+      padding: EdgeInsets.symmetric(vertical: 1, horizontal: 2),
+      child: Image.asset(
+        'lib/assets/images/icons/currency_yellow.png',
+        fit: BoxFit.contain,
+        width: priceFontSize,
+      ),
     );

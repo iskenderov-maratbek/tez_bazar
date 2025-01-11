@@ -10,7 +10,7 @@ import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/common/validators.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/services/auth_service.dart';
-import 'package:tez_bazar/services/user_service.dart';
+import 'package:tez_bazar/products_services/user_service.dart';
 import 'package:tez_bazar/constants/text_constants.dart';
 
 class UserProfile extends ConsumerStatefulWidget {

@@ -7,7 +7,7 @@ import 'package:tez_bazar/common/logging.dart';
 import 'package:tez_bazar/providers/providers.dart';
 import 'package:tez_bazar/common/grid_view_sets.dart';
 import 'package:tez_bazar/constants/text_constants.dart';
-import 'package:tez_bazar/views/info_view.dart';
+import 'package:tez_bazar/views/home/routes/products/widgets/info_view.dart';
 
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({super.key});
@@ -78,6 +78,7 @@ class SearchPageState extends ConsumerState<SearchView> {
         ),
       );
     }
+    final double priceFontSize = 16;
     return RefreshIndicator(
       onRefresh: _refreshAds,
       displacement: 85,
@@ -179,7 +180,7 @@ class SearchPageState extends ConsumerState<SearchView> {
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              textForm('${product.price}', 16,
+                              textForm('${product.price}', priceFontSize,
                                   weight: FontWeight.w900,
                                   textAlign: TextAlign.end),
                               SizedBox(
@@ -187,7 +188,7 @@ class SearchPageState extends ConsumerState<SearchView> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(top: 5),
-                                child: setCurrency(8),
+                                child: setPrice(8, priceFontSize),
                               ),
                             ],
                           ),

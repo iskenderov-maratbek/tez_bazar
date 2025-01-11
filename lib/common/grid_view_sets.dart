@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tez_bazar/common/app_colors.dart';
 
 class GridViewSets {
-  static padding() => EdgeInsets.only(bottom: 150, top: 100);
+  static padding() => EdgeInsets.only(bottom: 10, top: 20);
   static itemImageBorderRadius({bool top = false}) => top
       ? BorderRadius.vertical(top: Radius.circular(10))
       : BorderRadius.vertical(bottom: Radius.circular(10));
